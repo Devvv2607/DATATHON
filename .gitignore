@@ -5,15 +5,86 @@ __pycache__/
 .DS_Store
 .vscode/
 *.log
-# Decline Signals System
-
-*.pyc
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Testing & Coverage
 .pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+.pytest_cache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Environment Variables
 .env
 .env.local
-*.db
-*.log
-.idea/
-.vscode/
+.env.*.local
+
+# OS
+Thumbs.db
 .DS_Store
+
+# Project Specifics
+*.log
+*.csv
+*.xlsx
+data/raw/
+data/processed/
+output/
+results/
+
+# API Keys & Secrets
+api_keys.json
+secrets.json
+.credentials/
+
+# Cache & Temporary
+tmp/
+temp/
+*.cache
