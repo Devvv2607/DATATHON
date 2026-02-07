@@ -95,7 +95,10 @@ project/
 ### **Prerequisites**
 - Node.js 18+ & npm
 - Python 3.11+
-- Git
+- MongoDB (Docker or Atlas)
+- API Keys: Reddit, Twitter, Google Gemini
+
+📖 **Detailed Setup**: See [QUICKSTART.md](QUICKSTART.md)
 
 ### **1. Clone Repository**
 ```bash
@@ -109,9 +112,14 @@ cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
+
+# Configure .env with your API keys
+cp .env.example .env
+# Edit .env with MongoDB URI, Reddit, Twitter, Gemini credentials
+
 python main.py
 ```
-Backend runs on `http://localhost:8000`
+Backend runs on `http://localhost:8000` | API Docs: `http://localhost:8000/docs`
 
 ### **3. Frontend Setup**
 ```bash
@@ -121,14 +129,81 @@ npm run dev
 ```
 Frontend runs on `http://localhost:3000`
 
-### **4. Access Application**
-Open browser to `http://localhost:3000/dashboard`
+### **4. Search for Trends**
+1. Open: `http://localhost:3000`
+2. Click: **"Search Trends"**
+3. Enter: Any trend keyword (e.g., "Grimace Shake", "Wednesday Dance")
+4. Click: **"Analyze"**
+5. View: Lifecycle stage, confidence, full analysis
+
+---
+
+## 🔍 How to Use
+
+### **Option A: Web Interface (Recommended)**
+
+1. **Search Page** (`/search`)
+   - Enter trend keyword
+   - Get instant lifecycle detection
+   - View confidence scores
+   - Navigate to full dashboard
+
+2. **Dashboard** (`/dashboard`)
+   - View all analyzed trends
+   - Explore 6 analysis modules
+   - Interactive visualizations
+
+### **Option B: API Direct Access**
+
+```bash
+# Analyze trend lifecycle
+curl -X POST http://localhost:8000/api/trend/lifecycle \
+  -H "Content-Type: application/json" \
+  -d '{"trend_name": "Grimace Shake"}'
+
+# Collect Reddit data
+curl -X POST http://localhost:8000/api/data/reddit/search \
+  -H "Content-Type: application/json" \
+  -d '{"keyword": "Grimace Shake", "days_back": 30}'
+```
 
 ---
 
 ## 📊 API Endpoints
 
-### **Core Endpoints**
+### **Lifecycle Detection**
+
+#### `POST /api/trend/lifecycle`
+Detect lifecycle stage for a trend
+```bash
+curl -X POST "http://localhost:8000/api/trend/lifecycle" \
+  -H "Content-Type: application/json" \
+  -d '{"trend_name": "Grimace Shake"}'
+```
+
+**Response:**
+```json
+{
+  "trend_id": "507f1f77bcf86cd799439011",
+  "trend_name": "Grimace Shake",
+  "lifecycle_stage": 2,
+  "stage_name": "Viral Explosion",
+  "days_in_stage": 5,
+  "confidence": 0.85
+}
+```
+
+### **Data Collection**
+
+#### `POST /api/data/reddit/search`
+Collect Reddit posts and comments
+```bash
+curl -X POST "http://localhost:8000/api/data/reddit/search" \
+  -H "Content-Type: application/json" \
+  -d '{"keyword": "Grimace Shake", "days_back": 30, "post_limit": 100}'
+```
+
+### **Legacy Endpoints (Mock Data)**
 
 #### `GET /api/trends`
 Get list of trending topics with filters

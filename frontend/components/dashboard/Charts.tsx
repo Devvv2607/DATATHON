@@ -19,46 +19,80 @@ export function TrendChart({
   showGrid = true,
   type = 'line'
 }: ChartProps) {
-  const ChartComponent = type === 'area' ? AreaChart : LineChart;
-  const DataComponent = type === 'area' ? Area : Line;
-
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <ChartComponent data={data}>
-        {showGrid && (
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-        )}
-        <XAxis 
-          dataKey="date" 
-          stroke="rgba(255,255,255,0.3)"
-          style={{ fontSize: '12px' }}
-          tickLine={false}
-        />
-        <YAxis 
-          stroke="rgba(255,255,255,0.3)"
-          style={{ fontSize: '12px' }}
-          tickLine={false}
-        />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'rgba(17, 24, 39, 0.95)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '8px',
-            padding: '12px'
-          }}
-          labelStyle={{ color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}
-          itemStyle={{ color: color }}
-        />
-        <DataComponent
-          type="monotone"
-          dataKey={dataKey}
-          stroke={color}
-          strokeWidth={2}
-          fill={type === 'area' ? `${color}30` : undefined}
-          dot={false}
-          activeDot={{ r: 6, fill: color }}
-        />
-      </ChartComponent>
+      {type === 'area' ? (
+        <AreaChart data={data}>
+          {showGrid && (
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          )}
+          <XAxis 
+            dataKey="date" 
+            stroke="rgba(255,255,255,0.3)"
+            style={{ fontSize: '12px' }}
+            tickLine={false}
+          />
+          <YAxis 
+            stroke="rgba(255,255,255,0.3)"
+            style={{ fontSize: '12px' }}
+            tickLine={false}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: 'rgba(17, 24, 39, 0.95)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px',
+              padding: '12px'
+            }}
+            labelStyle={{ color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}
+            itemStyle={{ color: color }}
+          />
+          <Area
+            type="monotone"
+            dataKey={dataKey}
+            stroke={color}
+            strokeWidth={2}
+            fill={`${color}30`}
+            dot={false}
+            activeDot={{ r: 6, fill: color }}
+          />
+        </AreaChart>
+      ) : (
+        <LineChart data={data}>
+          {showGrid && (
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          )}
+          <XAxis 
+            dataKey="date" 
+            stroke="rgba(255,255,255,0.3)"
+            style={{ fontSize: '12px' }}
+            tickLine={false}
+          />
+          <YAxis 
+            stroke="rgba(255,255,255,0.3)"
+            style={{ fontSize: '12px' }}
+            tickLine={false}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: 'rgba(17, 24, 39, 0.95)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px',
+              padding: '12px'
+            }}
+            labelStyle={{ color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}
+            itemStyle={{ color: color }}
+          />
+          <Line
+            type="monotone"
+            dataKey={dataKey}
+            stroke={color}
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 6, fill: color }}
+          />
+        </LineChart>
+      )}
     </ResponsiveContainer>
   );
 }

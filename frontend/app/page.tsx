@@ -23,12 +23,20 @@ export default function Home() {
               </div>
               <span className="text-2xl font-bold gradient-text">TrendPulse</span>
             </div>
-            <Link
-              href="/dashboard"
-              className="px-6 py-2.5 rounded-full glass-strong hover:scale-105 transition-all duration-300"
-            >
-              Launch Dashboard
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/search"
+                className="px-6 py-2.5 rounded-full glass hover:scale-105 transition-all duration-300"
+              >
+                Search Trends
+              </Link>
+              <Link
+                href="/dashboard"
+                className="px-6 py-2.5 rounded-full glass-strong hover:scale-105 transition-all duration-300"
+              >
+                Launch Dashboard
+              </Link>
+            </div>
           </nav>
 
           {/* Hero Content */}
@@ -51,15 +59,18 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
               <Link
-                href="/dashboard"
+                href="/search"
                 className="group px-8 py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-[0_0_40px_rgba(96,165,250,0.4)] hover:scale-105 transition-all duration-300 flex items-center gap-2 text-lg font-semibold"
               >
-                Get Started
+                Search Trends
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <button className="px-8 py-4 rounded-full glass-strong hover:scale-105 transition-all duration-300 text-lg">
-                Watch Demo
-              </button>
+              <Link
+                href="/dashboard"
+                className="px-8 py-4 rounded-full glass-strong hover:scale-105 transition-all duration-300 text-lg"
+              >
+                View Dashboard
+              </Link>
             </div>
 
             {/* Stats */}

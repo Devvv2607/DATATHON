@@ -24,6 +24,23 @@ class Settings(BaseSettings):
     # Database (for future implementation)
     DATABASE_URL: str = "sqlite:///./trends.db"
     
+    # MongoDB Configuration
+    MONGODB_URI: str = "mongodb://localhost:27017"
+    MONGODB_DB_NAME: str = "trend_analysis"
+    
+    # Google Gemini AI API
+    GOOGLE_GEMINI_API_KEY: str = ""
+    
+    # Twitter/X API
+    TWITTER_BEARER_TOKEN: str = ""
+    
+    # Reddit API
+    REDDIT_CLIENT_ID: str = ""
+    REDDIT_CLIENT_SECRET: str = ""
+    REDDIT_USERNAME: str = ""
+    REDDIT_PASSWORD: str = ""
+    REDDIT_USER_AGENT: str = "TrendLens/1.0"
+    
     # ML Model Settings
     MODEL_PATH: str = "./models/"
     FEATURE_CACHE_TTL: int = 3600  # 1 hour
@@ -40,7 +57,9 @@ class Settings(BaseSettings):
     
     class Config:
         env_file = ".env"
+        env_file_encoding = 'utf-8'
         case_sensitive = True
+        extra = 'allow'
 
 # Create global settings instance
 settings = Settings()

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { simulateIntervention, type SimulationResponse } from '@/lib/api';
-import { Sliders, Play, RotateCcw, TrendingUp, DollarSign } from 'lucide-react';
+import { Sliders, Play, RotateCcw, TrendingUp, DollarSign, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { formatCurrency } from '@/lib/utils';
 

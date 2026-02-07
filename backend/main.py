@@ -3,16 +3,29 @@ Social Media Trend Analysis Platform - FastAPI Backend
 Main application entry point with CORS, routers, and middleware
 """
 
+from dotenv import load_dotenv
+load_dotenv()  # Load .env before importing config
+
+import logging
+
+# Configure logging to show INFO level messages
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(levelname)s:     %(message)s'
+)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from trend_analysis.router import router as trend_router
+from trend_analysis.lifecycle.controller import router as lifecycle_router
+from data_collectors.reddit_collector import router as reddit_router
 
 # Initialize FastAPI app
 app = FastAPI(
     title="Trend Decline Prediction API",
-    description="ML-powered social media trend analysis and decline prediction",
-    version="1.0.0",
+    description="ML-powered social media trend analysis and decline prediction with lifecycle detection",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -28,6 +41,8 @@ app.add_middleware(
 
 # Register feature routers
 app.include_router(trend_router, prefix="/api/trends", tags=["Trends"])
+app.include_router(lifecycle_router, tags=["Trend Lifecycle"])
+app.include_router(reddit_router, tags=["Data Collection"])
 
 @app.get("/")
 async def root():
@@ -35,9 +50,11 @@ async def root():
     return {
         "status": "online",
         "service": "Trend Analysis API",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "endpoints": {
             "trends": "/api/trends",
+            "lifecycle": "/api/trend/lifecycle",
+            "reddit_data": "/api/data/reddit/search",
             "docs": "/docs"
         }
     }
