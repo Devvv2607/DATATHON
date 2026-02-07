@@ -13,7 +13,8 @@ import {
   Activity,
   Shield,
   Sparkles,
-  MessageCircle
+  MessageCircle,
+  Share2
 } from 'lucide-react';
 
 const navigation = [
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'Decline Signals', href: '/dashboard/declineSignals', icon: Shield },
   { name: 'Comeback AI', href: '/dashboard/comeback', icon: Sparkles },
   { name: 'Chat Assistant', href: '/dashboard/chat', icon: MessageCircle },
+  { name: 'Social Graph', href: '/dashboard/social-graph', icon: Share2 },
   { name: 'Explainability', href: '/dashboard/explainability', icon: Brain },
   { name: 'What-If Simulator', href: '/dashboard/simulator', icon: Sliders },
   { name: 'Network Analysis', href: '/dashboard/network', icon: Network },

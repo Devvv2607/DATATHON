@@ -25,6 +25,7 @@ from comeback_ai.router import router as comeback_router
 from trend_analyzer.router import router as trend_analyzer_router
 from explainable_ai.router import router as explainable_ai_router
 from chatbot.router import router as chatbot_router
+from social_graph.router import router as social_graph_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -53,6 +54,7 @@ app.include_router(comeback_router, tags=["Comeback AI - Content Generation"])
 app.include_router(trend_analyzer_router, tags=["Trend Analyzer - Twitter/X Analysis"])
 app.include_router(explainable_ai_router, tags=["Explainable AI - Decision Transparency"])
 app.include_router(chatbot_router, tags=["Chatbot - Unified Interface"])
+app.include_router(social_graph_router, tags=["Social Graph - Reddit Network"])
 
 @app.get("/")
 async def root():
@@ -68,6 +70,7 @@ async def root():
             "comeback_ai": "/api/comeback/generate",
             "trend_analyzer": "/api/trend-analyzer/analyze",
             "explainable_ai": "/api/explainable-ai/explain",
+            "social_graph": "/api/social-graph/reddit",
             "chatbot": "/api/chat/message",
             "reddit_data": "/api/data/reddit/search",
             "docs": "/docs"
