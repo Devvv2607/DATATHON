@@ -155,6 +155,89 @@ class LifecycleService:
             logger.info(f"   Confidence: {final_confidence:.2%}")
             logger.info(f"{'='*80}")
             
+            # === STEP 6: Auto-trigger Decline Signals ===
+            # Convert Reddit data to TrendMetric format and analyze decline signals
+            try:
+                from decline_signals.router import AnalyzeRequest
+                from decline_signals.models import DailyMetric
+                from datetime import datetime, timedelta
+                import httpx
+                
+                logger.info(f"🔍 Analyzing decline signals for: '{trend_name}' (Stage: {stage_name})")
+                
+                # Convert Reddit daily data to TrendMetric format
+                daily_metrics_list = []
+                reddit_raw = reddit_signals.raw_data
+                daily_posts = reddit_raw.get("daily_posts", {})
+                daily_comments = reddit_raw.get("daily_comments", {})
+                daily_scores = reddit_raw.get("daily_scores", {})
+                
+                # Get all dates from Reddit data
+                all_dates = sorted(set(list(daily_posts.keys()) + list(daily_comments.keys()) + list(daily_scores.keys())))
+                
+                if all_dates:
+                    for date_str in all_dates:
+                        posts = daily_posts.get(date_str, 0)
+                        comments = daily_comments.get(date_str, 0)
+                        score = daily_scores.get(date_str, 0)
+                        
+                        # Calculate metrics
+                        total_engagement = comments + score
+                        views = posts * 100  # Estimate: 100 views per post
+                        avg_comments_per_post = comments / posts if posts > 0 else 0
+                        avg_engagement_per_post = total_engagement / posts if posts > 0 else 0
+                        
+                        daily_metrics_list.append({
+                            "date": date_str,
+                            "total_engagement": total_engagement,
+                            "views": views,
+                            "posts_count": posts,
+                            "creators_count": max(1, int(posts * 0.8)),
+                            "avg_creator_followers": 1000.0,
+                            "avg_comments_per_post": avg_comments_per_post,
+                            "avg_engagement_per_post": avg_engagement_per_post
+                        })
+                
+                # If no daily data, create synthetic from aggregated data
+                if not daily_metrics_list:
+                    today = datetime.now().date()
+                    for i in range(7):
+                        date = today - timedelta(days=6-i)
+                        daily_metrics_list.append({
+                            "date": date.isoformat(),
+                            "total_engagement": int(reddit_signals.comment_count / 7),
+                            "views": int(reddit_signals.post_count * 100 / 7),
+                            "posts_count": int(reddit_signals.post_count / 7),
+                            "creators_count": max(1, int(reddit_signals.post_count / 7 * 0.8)),
+                            "avg_creator_followers": 1000.0,
+                            "avg_comments_per_post": reddit_signals.comment_count / reddit_signals.post_count if reddit_signals.post_count > 0 else 0,
+                            "avg_engagement_per_post": reddit_signals.comment_count / reddit_signals.post_count if reddit_signals.post_count > 0 else 0
+                        })
+                
+                # Call decline signals API internally
+                async with httpx.AsyncClient() as client:
+                    payload = {
+                        "trend_name": trend_name,
+                        "lifecycle_stage": int(stage.value),
+                        "stage_name": stage_name,
+                        "confidence": final_confidence
+                    }
+                    decline_response = await client.post(
+                        "http://localhost:8000/api/decline-signals/analyze",
+                        json=payload,
+                        timeout=30.0
+                    )
+                    if decline_response.status_code == 200:
+                        decline_data = decline_response.json()
+                        logger.info(f"✅ Decline signals: Risk {decline_data.get('decline_risk_score', 0):.1f}/100, Alert {decline_data.get('alert_level', 'unknown').upper()}")
+                    else:
+                        logger.warning(f"⚠️ Decline signals returned {decline_response.status_code}")
+                
+            except Exception as e:
+                logger.error(f"❌ Decline signal analysis failed: {e}", exc_info=True)
+                # Don't fail the whole request if decline signals fail
+                pass
+            
             return response
         
         except Exception as e:

@@ -163,7 +163,7 @@ async def analyze_decline_signals(request: AnalyzeRequest):
         
         logger.info(f"   - Raw Risk Score: {decline_risk_score:.2f}/100")
         logger.info(f"   - Alert Level: {alert_level.upper()}")
-        logger.info(f"   - Confidence: {confidence_level}")
+        logger.info(f"   - Confidence: {confidence_level}")  # confidence_level is a string, not a number
         
         # === DEAD TREND DETECTION ===
         # Check if low scores actually mean DEAD (not safe)
@@ -236,32 +236,8 @@ async def analyze_decline_signals(request: AnalyzeRequest):
                     quality_decline=round(75.0, 2)
                 )
         
-        # OVERRIDE 3: Plateau/Decline with artificial Google Trends spike
-        # (Google Trends > 50 but Reddit posts are nostalgia)
-        elif (decline_risk_score < 40 and  # Low-ish risk
-              resolved_stage in [3, 4] and  # Plateau or Decline stage
-              lifecycle_info.confidence > 0.8):  # High confidence (Google Trends spike)
-            
-            # This catches cases where our searches artificially inflated Google Trends
-            # but Reddit posts are mostly nostalgia (filtered down from 94→87)
-            logger.info(f"   ⚠️ SUSPECTED DEAD TREND (artificial spike): Checking nostalgia ratio...")
-            logger.info(f"      Confidence: {lifecycle_info.confidence:.1%} (high = Google Trends spike)")
-            
-            # If it's showing as Plateau/Decline with high confidence from Google Trends,
-            # but low risk score, it's likely a dead trend with search-induced spike
-            decline_risk_score = 70.0  # Force ORANGE
-            alert_level = "orange"
-            confidence_level = "medium"
-            
-            logger.info(f"   ⚠️ DEAD TREND DETECTED (search-induced spike): Overriding GREEN → ORANGE")
-            logger.info(f"      Reason: Plateau stage + high confidence + low risk = likely dead with artificial spike")
-            
-            signal_breakdown = SignalBreakdown(
-                engagement_drop=round(70.0, 2),
-                velocity_decline=round(70.0, 2),
-                creator_decline=round(70.0, 2),
-                quality_decline=round(70.0, 2)
-            )
+        # NOTE: OVERRIDE 3 removed - lifecycle classification now properly detects viral/dead trends
+        # No more hard-coded overrides needed!
         
         logger.info(f"   - Final Risk Score: {decline_risk_score:.2f}/100")
         logger.info(f"   - Final Alert: {alert_level.upper()}")

@@ -42,8 +42,10 @@ def calculate_creator_decline(
     # Score
     risk_score = 0.0
     
+    # IMPORTANT: Negative percentages = GROWTH (good!), should be 0 score
+    # Positive percentages = DECLINE (bad!), should have high score
     if creator_decline_pct <= 0:
-        creator_score = 0.0
+        creator_score = 0.0  # Growing or stable = no risk
     elif creator_decline_pct < creator_drop_threshold:
         creator_score = (creator_decline_pct / creator_drop_threshold) * max_score * 0.5
     else:
@@ -51,15 +53,19 @@ def calculate_creator_decline(
         creator_score = min(normalized * max_score, 100.0)
     
     if follower_decline_pct <= 0:
-        follower_score = 0.0
+        follower_score = 0.0  # Growing or stable = no risk
     else:
-        follower_score = (follower_decline_pct / 50) * max_score * avg_follower_weight
+        follower_score = min((follower_decline_pct / 50) * max_score * avg_follower_weight, 100.0)
     
     # Both declining = serious concern
     if creator_decline_pct > 0 and follower_decline_pct > 0:
         risk_score = 0.7 * creator_score + 0.3 * follower_score
-    else:
-        risk_score = max(creator_score, follower_score)
+    elif creator_decline_pct > 0:  # Only creators declining
+        risk_score = creator_score
+    elif follower_decline_pct > 0:  # Only followers declining
+        risk_score = follower_score
+    else:  # Both growing/stable
+        risk_score = 0.0
     
     risk_score = min(risk_score, 100.0)
     explanation = f"Creators: {creator_decline_pct:.1f}%, Followers: {follower_decline_pct:.1f}%"
