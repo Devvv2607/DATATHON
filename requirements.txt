@@ -1,0 +1,7 @@
+pytrends==4.9.2
+groq==1.0.0
+hypothesis==6.112.1
+pytest==8.3.3
+pandas==2.2.3
+python-dotenv==1.0.1
+scipy==1.14.1
