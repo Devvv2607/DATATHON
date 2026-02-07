@@ -634,63 +634,299 @@ def generate_counterfactuals(
     signal_breakdown: Dict
 ) -> Dict:
     """
-    Generate rule-based counterfactuals for risk reduction/escalation.
+    Generate detailed, actionable counterfactual scenarios for risk reduction and escalation.
     """
     reduction_scenarios = []
     escalation_scenarios = []
     
-    # Get primary signal
+    # Get primary and secondary signals
     primary_signal, primary_score = ranked_signals[0] if ranked_signals else (None, 0)
+    secondary_signal, secondary_score = ranked_signals[1] if len(ranked_signals) > 1 else (None, 0)
     
-    # ===== RISK REDUCTION SCENARIOS =====
+    # ===== RISK REDUCTION SCENARIOS (What could improve it) =====
     if alert_level == "red":
-        # Red → Orange
-        reduction_scenarios.append(
-            "If engagement rebounds by approximately 15% within the next 48 hours, the risk level would likely downgrade to Orange."
-        )
-        # Red → Orange via creator
+        # CRITICAL → HIGH scenarios
+        reduction_scenarios.append({
+            "scenario": "Emergency Engagement Recovery",
+            "intervention": "Launch viral content campaign with 3-5 high-quality posts from top creators",
+            "requirement": "15-20% engagement rebound within 48 hours",
+            "expected_outcome": f"Risk reduction: 15-20 points → Likely downgrade to ORANGE ({max(40, risk_score-17):.0f} points)",
+            "success_probability": "Medium (40-60%)",
+            "timeline": "48-72 hours",
+            "actions": [
+                "Partner with top 5 creators for coordinated content drop",
+                "Launch engagement challenge with prizes (comments, shares)",
+                "Promote viral post candidates across all channels",
+                "Time posts for peak audience hours (2-4 PM, 7-9 PM)"
+            ]
+        })
+        
         if signal_breakdown.get("creator_decline", 0) > 70:
-            reduction_scenarios.append(
-                "If creator participation stabilizes for two consecutive days, overall risk would decrease by approximately 12-15 points."
-            )
+            reduction_scenarios.append({
+                "scenario": "Creator Re-Engagement Program",
+                "intervention": "Emergency creator incentives and direct outreach",
+                "requirement": "Stabilize creator participation for 2 consecutive days",
+                "expected_outcome": f"Risk reduction: 12-15 points → Possible ORANGE zone ({max(40, risk_score-13):.0f} points)",
+                "success_probability": "Medium-High (50-70%)",
+                "timeline": "3-5 days",
+                "actions": [
+                    "Email/DM top 20 creators with personalized incentives",
+                    "Offer featured placement for high-quality content",
+                    "Create exclusive creator community/Discord channel",
+                    "Launch mini-grant program for creative content ($50-200/post)"
+                ]
+            })
+        
+        reduction_scenarios.append({
+            "scenario": "Quality Curation Overhaul",
+            "intervention": "Aggressive low-quality content filtering + quality showcase",
+            "requirement": "Quality score improvement by 10+ points",
+            "expected_outcome": f"Risk reduction: 8-12 points → Marginal improvement ({max(40, risk_score-10):.0f} points)",
+            "success_probability": "High (60-80%)",
+            "timeline": "2-3 days",
+            "actions": [
+                "Hide/demote bottom 30% of content by engagement rate",
+                "Feature top 10% in prime visibility positions",
+                "Create 'Best of' compilation posts",
+                "Establish minimum quality threshold for visibility"
+            ]
+        })
     
     elif alert_level == "orange":
-        # Orange → Yellow
-        reduction_scenarios.append(
-            "If engagement rebounds by approximately 15% within the next 48 hours, the risk level would likely downgrade to Yellow."
-        )
+        # HIGH → MODERATE scenarios
+        reduction_scenarios.append({
+            "scenario": "Engagement Stabilization",
+            "intervention": "Targeted content optimization + creator engagement",
+            "requirement": "12-15% engagement improvement over 3 days",
+            "expected_outcome": f"Risk reduction: 10-15 points → Downgrade to YELLOW ({max(20, risk_score-12):.0f} points)",
+            "success_probability": "Medium-High (55-75%)",
+            "timeline": "3-5 days",
+            "actions": [
+                "Analyze top 10 posts - replicate success patterns",
+                "Launch themed content week to refresh interest",
+                "Engage 10-15 key creators for coordinated posts",
+                "Test new content formats (carousels, video, interactive)"
+            ]
+        })
+        
         if signal_breakdown.get("velocity_decline", 0) > 60:
-            reduction_scenarios.append(
-                "If growth acceleration turns positive (even slightly), overall risk would decrease by 8-12 points."
-            )
+            reduction_scenarios.append({
+                "scenario": "Growth Momentum Reversal",
+                "intervention": "Viral content seeding + influencer partnerships",
+                "requirement": "Turn growth acceleration positive (even slightly)",
+                "expected_outcome": f"Risk reduction: 8-12 points → Possible YELLOW zone ({max(20, risk_score-10):.0f} points)",
+                "success_probability": "Medium (45-65%)",
+                "timeline": "4-7 days",
+                "actions": [
+                    "Partner with 2-3 macro-influencers for trend revival",
+                    "Cross-promote on other trending hashtags/topics",
+                    "Launch community challenge to drive new participation",
+                    "Seed content in high-traffic communities/subreddits"
+                ]
+            })
+        
+        reduction_scenarios.append({
+            "scenario": "Multi-Signal Improvement",
+            "intervention": "Comprehensive trend revival campaign",
+            "requirement": "Improve all signals by 5-8% simultaneously",
+            "expected_outcome": f"Risk reduction: 12-18 points → Strong YELLOW or GREEN ({max(15, risk_score-15):.0f} points)",
+            "success_probability": "Low-Medium (30-50%)",
+            "timeline": "7-10 days",
+            "actions": [
+                "Full trend refresh with new branding/angle",
+                "Major creator incentive program launch",
+                "Platform partnership for promoted placement",
+                "Quality-focused content showcase campaign"
+            ]
+        })
     
     elif alert_level == "yellow":
-        # Yellow → Green
-        reduction_scenarios.append(
-            "Sustained engagement growth over the next 3 days would likely downgrade the alert to Green."
-        )
+        # MODERATE → LOW scenarios
+        reduction_scenarios.append({
+            "scenario": "Sustained Growth Recovery",
+            "intervention": "Maintain momentum with content consistency",
+            "requirement": "Sustained engagement growth over next 3-5 days",
+            "expected_outcome": f"Risk reduction: 8-12 points → Downgrade to GREEN ({max(0, risk_score-10):.0f} points)",
+            "success_probability": "High (65-85%)",
+            "timeline": "3-5 days",
+            "actions": [
+                "Maintain current content cadence (3-5 quality posts/day)",
+                "Continue engaging top creators with recognition/features",
+                "Monitor and respond to trending sub-topics quickly",
+                "Keep quality bar high - reject low-effort submissions"
+            ]
+        })
+        
+        reduction_scenarios.append({
+            "scenario": "Proactive Quality Enhancement",
+            "intervention": "Quality-first curation and creator support",
+            "requirement": "Quality score improvement by 8-10%",
+            "expected_outcome": f"Risk reduction: 6-10 points → Solid GREEN zone ({max(0, risk_score-8):.0f} points)",
+            "success_probability": "High (70-90%)",
+            "timeline": "5-7 days",
+            "actions": [
+                "Launch 'creator masterclass' webinar series",
+                "Provide content templates for high-performing formats",
+                "Feature 'Content of the Day' to set quality standards",
+                "Offer constructive feedback to active creators"
+            ]
+        })
     
-    # ===== RISK ESCALATION SCENARIOS =====
+    else:  # green
+        reduction_scenarios.append({
+            "scenario": "Maintain Healthy Status",
+            "intervention": "Steady-state monitoring with minor optimizations",
+            "requirement": "Keep all signals stable at current levels",
+            "expected_outcome": f"Risk maintained: {risk_score:.0f} points (GREEN zone sustained)",
+            "success_probability": "Very High (80-95%)",
+            "timeline": "Ongoing",
+            "actions": [
+                "Daily signal monitoring for early warning signs",
+                "Regular creator check-ins and appreciation",
+                "Rotate content themes to prevent saturation",
+                "Experiment with new formats while keeping quality high"
+            ]
+        })
+    
+    # ===== RISK ESCALATION SCENARIOS (What could make it worse) =====
     if alert_level == "green":
-        escalation_scenarios.append(
-            "A sharp engagement drop of 20% or more in the next day could escalate the alert to Yellow."
-        )
+        escalation_scenarios.append({
+            "trigger": "Engagement Drop Event",
+            "condition": "10-15% engagement decline over 2-3 days",
+            "outcome": f"Risk increase: 8-12 points → Escalation to YELLOW ({min(100, risk_score+10):.0f} points)",
+            "probability": "Low (10-25%)",
+            "warning_signs": [
+                "Daily engagement rate dropping below baseline",
+                "Comment volume decreasing 2 days in row",
+                "Share velocity slowing significantly",
+                "Top posts underperforming historical average"
+            ],
+            "prevention": [
+                "Monitor engagement metrics daily",
+                "Have content refresh plan ready to deploy",
+                "Maintain creator relationships for quick mobilization"
+            ]
+        })
+        
+        escalation_scenarios.append({
+            "trigger": "Creator Exodus Begins",
+            "condition": "Key creators (top 10) reduce activity by 20%+",
+            "outcome": f"Risk increase: 6-10 points → Possible YELLOW ({min(100, risk_score+8):.0f} points)",
+            "probability": "Low-Medium (15-30%)",
+            "warning_signs": [
+                "Posting frequency from top creators declining",
+                "High-quality content volume dropping",
+                "Creators openly discussing moving to other trends",
+                "New creator onboarding slowing"
+            ],
+            "prevention": [
+                "Weekly top creator engagement/recognition",
+                "Early incentive programs before exodus begins",
+                "Creator feedback loops to address concerns"
+            ]
+        })
+    
     elif alert_level == "yellow":
-        escalation_scenarios.append(
-            "An additional engagement drop of 15% would likely escalate the alert to Orange."
-        )
+        escalation_scenarios.append({
+            "trigger": "Multi-Signal Acceleration",
+            "condition": "Two or more signals deteriorate simultaneously",
+            "outcome": f"Risk increase: 12-18 points → Escalation to ORANGE ({min(100, risk_score+15):.0f} points)",
+            "probability": "Medium (30-45%)",
+            "warning_signs": [
+                "Engagement AND velocity both declining",
+                "Creator participation dropping alongside quality",
+                "Multiple red flags appearing in 24-hour window",
+                "Negative sentiment spike in comments"
+            ],
+            "prevention": [
+                "Immediate intervention at first sign of decline",
+                "Don't wait for multiple signals - act on one",
+                "Have emergency response playbook ready"
+            ]
+        })
+        
+        escalation_scenarios.append({
+            "trigger": "Competing Trend Emerges",
+            "condition": "New viral trend captures audience attention",
+            "outcome": f"Risk increase: 10-15 points → Strong ORANGE zone ({min(100, risk_score+12):.0f} points)",
+            "probability": "Medium (25-40%)",
+            "warning_signs": [
+                "Sharp drop in discovery/search metrics",
+                "Creators mentioning other trending topics",
+                "Sudden audience migration to new hashtags",
+                "Platform algorithm favoring competitor content"
+            ],
+            "prevention": [
+                "Monitor competing trends daily",
+                "Adapt quickly - incorporate fresh angles",
+                "Partner with influencers before they switch"
+            ]
+        })
+    
     elif alert_level == "orange":
-        escalation_scenarios.append(
-            "An additional engagement drop of 10% would likely escalate the alert to Red."
-        )
+        escalation_scenarios.append({
+            "trigger": "Viral Collapse",
+            "condition": "Engagement drops another 15-20% within 48 hours",
+            "outcome": f"Risk increase: 15-25 points → CRITICAL RED zone ({min(100, risk_score+20):.0f} points)",
+            "probability": "Medium-High (40-60%)",
+            "warning_signs": [
+                "Accelerating engagement decline (faster than previous days)",
+                "Creator exodus accelerating",
+                "Quality floor collapsing (low-effort spam increasing)",
+                "Negative news/scandal related to trend"
+            ],
+            "prevention": [
+                "URGENT: Launch emergency interventions NOW",
+                "Don't wait - situation deteriorating rapidly",
+                "Full-team mobilization required"
+            ]
+        })
+        
+        escalation_scenarios.append({
+            "trigger": "Content Quality Collapse",
+            "condition": "Spam/low-quality content overwhelms feed",
+            "outcome": f"Risk increase: 10-18 points → HIGH RED zone ({min(100, risk_score+14):.0f} points)",
+            "probability": "Medium (35-50%)",
+            "warning_signs": [
+                "Feed dominated by duplicates and low-effort posts",
+                "Engagement-per-view ratio plummeting",
+                "User complaints about content quality",
+                "Top creators complaining about spam drowning their content"
+            ],
+            "prevention": [
+                "Aggressive content moderation and curation",
+                "Quality filters and minimum standards",
+                "Feature high-quality content prominently"
+            ]
+        })
+    
     elif alert_level == "red":
-        escalation_scenarios.append(
-            "Further deterioration in engagement or creator participation could indicate trend irreversibility."
-        )
+        escalation_scenarios.append({
+            "trigger": "Point of No Return",
+            "condition": "All signals continue worsening despite interventions",
+            "outcome": f"Risk increase: 10-20 points → TERMINAL DECLINE ({min(100, risk_score+15):.0f} points)",
+            "probability": "High (60-80%)",
+            "warning_signs": [
+                "No interventions showing positive effect",
+                "Creator base completely abandoned",
+                "Engagement approaching zero",
+                "Quality irreversibly collapsed"
+            ],
+            "reality_check": [
+                "At CRITICAL level, recovery probability is very low",
+                "May be past trend lifecycle end-stage",
+                "Consider strategic pivot to related trends",
+                "Document lessons learned for future campaigns"
+            ]
+        })
     
     return {
-        "risk_reduction_scenarios": reduction_scenarios,
-        "risk_escalation_scenarios": escalation_scenarios
+        "reduction_scenarios": reduction_scenarios,
+        "escalation_scenarios": escalation_scenarios,
+        "primary_lever": primary_signal.replace('_', ' ').title() if primary_signal else "Unknown",
+        "secondary_lever": secondary_signal.replace('_', ' ').title() if secondary_signal else None,
+        "intervention_urgency": "immediate" if alert_level in ["red", "orange"] else "proactive" if alert_level == "yellow" else "routine",
+        "recovery_probability": "very_low" if alert_level == "red" else "low_to_medium" if alert_level == "orange" else "medium_to_high" if alert_level == "yellow" else "high"
     }
 
 
