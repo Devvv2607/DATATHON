@@ -31,10 +31,10 @@ export default function Home() {
                 Search Trends
               </Link>
               <Link
-                href="/dashboard"
+                href="/signup"
                 className="px-6 py-2.5 rounded-full glass-strong hover:scale-105 transition-all duration-300"
               >
-                Launch Dashboard
+                Get Started
               </Link>
             </div>
           </nav>
@@ -66,10 +66,10 @@ export default function Home() {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
-                href="/dashboard"
+                href="/signup"
                 className="px-8 py-4 rounded-full glass-strong hover:scale-105 transition-all duration-300 text-lg"
               >
-                View Dashboard
+                Get Started
               </Link>
             </div>
 

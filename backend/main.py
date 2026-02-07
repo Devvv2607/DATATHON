@@ -13,6 +13,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(levelname)s:     %(message)s'
 )
+logger = logging.getLogger(__name__)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +27,10 @@ from trend_analyzer.router import router as trend_analyzer_router
 from explainable_ai.router import router as explainable_ai_router
 from chatbot.router import router as chatbot_router
 from social_graph.router import router as social_graph_router
+from auth.router import router as auth_router
+from auth.database import AuthDatabase, auth_db as global_auth_db
+from motor.motor_asyncio import AsyncIOMotorClient
+from business_intelligence.router import router as business_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -46,6 +51,8 @@ app.add_middleware(
 )
 
 # Register feature routers
+app.include_router(auth_router, tags=["Authentication"])
+app.include_router(business_router, tags=["Business Intelligence"])
 app.include_router(trend_router, prefix="/api/trends", tags=["Trends"])
 app.include_router(lifecycle_router, tags=["Trend Lifecycle"])
 app.include_router(reddit_router, tags=["Data Collection"])
@@ -86,6 +93,27 @@ async def health_check():
         "ml_models": "loaded",    # Placeholder for ML model status
         "cache": "active"         # Placeholder for cache status
     }
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database connections on startup"""
+    try:
+        # Initialize MongoDB for auth
+        import os
+        from auth import database as auth_database
+        
+        mongodb_uri = os.getenv("MONGODB_URI")
+        if mongodb_uri:
+            client = AsyncIOMotorClient(mongodb_uri)
+            db_name = os.getenv("MONGODB_DB_NAME", "trend_analysis")
+            db = client[db_name]
+            auth_database.auth_db = AuthDatabase(db)
+            await auth_database.auth_db.create_indexes()
+            logger.info("✅ Auth database initialized")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize auth database: {e}")
+
 
 if __name__ == "__main__":
     import uvicorn
