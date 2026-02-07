@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Decline Signals System
 
 *.pyc
@@ -10,3 +11,12 @@ __pycache__/
 .idea/
 .vscode/
 .DS_Store
+=======
+venv/
+.env
+__pycache__/
+*.pyc
+.DS_Store
+.vscode/
+*.log
+>>>>>>> origin/comeback-ai
