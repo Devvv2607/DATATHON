@@ -11,13 +11,15 @@ import {
   Network,
   Lightbulb,
   Activity,
-  Shield
+  Shield,
+  Sparkles
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Overview', href: '/dashboard', icon: Activity },
   { name: 'Trend Lifecycle', href: '/dashboard/trendLifecycle', icon: TrendingUp },
   { name: 'Decline Signals', href: '/dashboard/declineSignals', icon: Shield },
+  { name: 'Comeback AI', href: '/dashboard/comeback', icon: Sparkles },
   { name: 'Explainability', href: '/dashboard/explainability', icon: Brain },
   { name: 'What-If Simulator', href: '/dashboard/simulator', icon: Sliders },
   { name: 'Network Analysis', href: '/dashboard/network', icon: Network },

@@ -21,6 +21,7 @@ from trend_analysis.router import router as trend_router
 from trend_analysis.lifecycle.controller import router as lifecycle_router
 from data_collectors.reddit_collector import router as reddit_router
 from decline_signals.router import router as decline_signals_router
+from comeback_ai.router import router as comeback_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -45,6 +46,7 @@ app.include_router(trend_router, prefix="/api/trends", tags=["Trends"])
 app.include_router(lifecycle_router, tags=["Trend Lifecycle"])
 app.include_router(reddit_router, tags=["Data Collection"])
 app.include_router(decline_signals_router, prefix="/api/decline-signals", tags=["Early Decline Detection"])
+app.include_router(comeback_router, tags=["Comeback AI - Content Generation"])
 
 @app.get("/")
 async def root():
@@ -56,7 +58,9 @@ async def root():
         "endpoints": {
             "trends": "/api/trends",
             "lifecycle": "/api/trend/lifecycle",
-            "reddit_data": "/api/data/reddit/search",
+            "recline_signals": "/api/decline-signals/analyze",
+            "comeback_ai": "/api/comeback/generate",
+            "deddit_data": "/api/data/reddit/search",
             "docs": "/docs"
         }
     }

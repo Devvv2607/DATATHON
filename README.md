@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🚀 TrendPredict: AI-Powered Social Media Trend Analysis Platform
 
 > **Hackathon-Grade Product** | Predict trend decline before it happens with ML-powered insights
@@ -373,7 +372,6 @@ Built with ❤️ by a team passionate about ML, data science, and solving real 
 Built for hackathons | Ready for production | Powered by ML
 
 </div>
-=======
 # Creative Recovery & Growth Agent 🎬
 
 A sophisticated AI-powered agent that converts trend intelligence into actionable social media content strategies. Powered by **Groq API** for fast, intelligent analysis and **PyTrends** for real-time trend data.
@@ -733,4 +731,3 @@ This project is proprietary. All rights reserved.
 **Built with** ❤️ for creators, marketers, and growth enthusiasts.
 
 **Powered by** 🚀 Groq AI + PyTrends Intelligence
->>>>>>> origin/comeback-ai
