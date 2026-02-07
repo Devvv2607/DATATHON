@@ -1,0 +1,12 @@
+# Decline Signals System
+
+*.pyc
+__pycache__/
+.pytest_cache/
+.env
+.env.local
+*.db
+*.log
+.idea/
+.vscode/
+.DS_Store
