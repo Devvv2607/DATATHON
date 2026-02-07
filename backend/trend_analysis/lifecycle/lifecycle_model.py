@@ -47,11 +47,11 @@ class LifecycleClassifier:
         logger.info(f"📊 Classification inputs: growth={growth_rate:.2f}, momentum={momentum:.2f}, decay={decay_signal:.2f}, interest={interest_score:.2f}")
         
         # === Rule 1: Death ===
-        # Near-zero activity across all platforms
+        # Google Trends dominance: If search interest is dead, the trend is dead
+        # (Reddit nostalgia posts are misleading)
         if (interest_score < self.DEATH_THRESHOLD and 
-            twitter.post_volume < 5 and 
-            reddit.post_count < 3):
-            logger.info("🪦 DEATH: Near-zero activity detected")
+            twitter.post_volume < 5):
+            logger.info(f"🪦 DEATH: Near-zero search interest (Google={interest_score:.1f}, Twitter={twitter.post_volume})")
             return LifecycleStage.DEATH, 0.95
         
         # === Rule 2: Decline ===

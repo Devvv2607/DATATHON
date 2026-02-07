@@ -85,13 +85,37 @@ export default function TrendLifecyclePage() {
   };
 
   useEffect(() => {
-    async function loadData() {
+    // Load initial default trend on mount
+    const loadInitialTrend = async () => {
       setLoading(true);
-      // Load initial default trend
-      await analyzeNewTrend('Ice Bucket Challenge');
-      setLoading(false);
-    }
-    loadData();
+      try {
+        const response = await fetch('http://localhost:8000/api/trend/lifecycle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ trend_name: 'Ice Bucket Challenge' })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          setLifecycleResult(result);
+          setTrendName('Ice Bucket Challenge');
+          
+          const mockTrajectory = generateTrajectoryFromStage(result.lifecycle_stage, result.confidence);
+          setTrendData({
+            trend_id: result.trend_id,
+            name: result.trend_name,
+            engagement_history: mockTrajectory.engagement_history,
+            sentiment_history: mockTrajectory.sentiment_history
+          } as any);
+        }
+      } catch (error) {
+        console.error('Initial load failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadInitialTrend();
   }, []);
 
   if (loading || !trendData) {

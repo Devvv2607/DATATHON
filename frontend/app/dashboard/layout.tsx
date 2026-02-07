@@ -10,12 +10,14 @@ import {
   Sliders,
   Network,
   Lightbulb,
-  Activity
+  Activity,
+  Shield
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Overview', href: '/dashboard', icon: Activity },
   { name: 'Trend Lifecycle', href: '/dashboard/trendLifecycle', icon: TrendingUp },
+  { name: 'Decline Signals', href: '/dashboard/declineSignals', icon: Shield },
   { name: 'Explainability', href: '/dashboard/explainability', icon: Brain },
   { name: 'What-If Simulator', href: '/dashboard/simulator', icon: Sliders },
   { name: 'Network Analysis', href: '/dashboard/network', icon: Network },

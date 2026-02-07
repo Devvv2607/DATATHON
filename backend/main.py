@@ -20,6 +20,7 @@ from config import settings
 from trend_analysis.router import router as trend_router
 from trend_analysis.lifecycle.controller import router as lifecycle_router
 from data_collectors.reddit_collector import router as reddit_router
+from decline_signals.router import router as decline_signals_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -43,6 +44,7 @@ app.add_middleware(
 app.include_router(trend_router, prefix="/api/trends", tags=["Trends"])
 app.include_router(lifecycle_router, tags=["Trend Lifecycle"])
 app.include_router(reddit_router, tags=["Data Collection"])
+app.include_router(decline_signals_router, prefix="/api/decline-signals", tags=["Early Decline Detection"])
 
 @app.get("/")
 async def root():

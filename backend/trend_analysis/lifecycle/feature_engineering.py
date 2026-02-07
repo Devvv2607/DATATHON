@@ -201,16 +201,58 @@ class FeatureEngineer:
             
             # Use the same logic as reddit_collector but for lifecycle analysis
             from datetime import timedelta
+            import re
+            
+            # Nostalgia detection keywords
+            NOSTALGIA_KEYWORDS = [
+                "remember", "throwback", "nostalgia", "back in", "used to", 
+                "miss", "childhood", "old days", "tbt", "fbf", "flashback",
+                "was popular", "died", "dead trend", "anyone remember", 
+                "brings back", "good old", "rip", "miss when", "back when",
+                "the days when", "vintage", "retro", "classic", "og"
+            ]
             
             # Search Reddit for recent posts (last 7 days for velocity)
-            posts = list(self.reddit_client.subreddit("all").search(
+            all_posts = list(self.reddit_client.subreddit("all").search(
                 trend_name, 
                 time_filter='week', 
                 limit=100
             ))
             
-            if not posts:
+            if not all_posts:
                 logger.warning(f"No Reddit data for '{trend_name}'")
+                return self._default_reddit_signals()
+            
+            # Filter out nostalgia posts
+            active_posts = []
+            nostalgia_posts = []
+            current_year = datetime.now().year
+            
+            for post in all_posts:
+                title_lower = post.title.lower()
+                
+                # Check for nostalgia keywords
+                has_nostalgia_keyword = any(keyword in title_lower for keyword in NOSTALGIA_KEYWORDS)
+                
+                # Check for old year mentions (2017-2022 are clearly old)
+                old_years = [str(year) for year in range(2015, current_year - 2)]  # Years older than 2 years ago
+                references_old_year = any(year in title_lower for year in old_years)
+                
+                # Check for phrases like "back in" + recent year (e.g., "back in 2023")
+                has_past_reference = bool(re.search(r'(back in|remember.*20\d{2}|was.*20\d{2})', title_lower))
+                
+                if has_nostalgia_keyword or references_old_year or has_past_reference:
+                    nostalgia_posts.append(post)
+                else:
+                    active_posts.append(post)
+            
+            # Use active posts (filter out nostalgia)
+            posts = active_posts
+            
+            logger.info(f"📊 Reddit filtering: {len(all_posts)} total → {len(posts)} active, {len(nostalgia_posts)} nostalgia filtered")
+            
+            if not posts:
+                logger.warning(f"All Reddit posts are nostalgia/throwback content for '{trend_name}'")
                 return self._default_reddit_signals()
             
             # Aggregate metrics
