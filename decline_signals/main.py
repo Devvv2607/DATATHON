@@ -27,6 +27,7 @@ from signals.velocity_decline import calculate_velocity_decline
 from signals.creator_decline import calculate_creator_decline
 from signals.quality_decline import calculate_quality_decline
 from aggregator import aggregate_signals
+from decline_predictor import generate_decline_prediction
 from utils import setup_logging, get_iso_timestamp
 
 # Configure logging
@@ -212,6 +213,20 @@ async def detect_decline_signals(
             data_quality
         )
         
+        # 4.5 Calculate time-to-decline (time_to_die)
+        time_to_die = None
+        try:
+            predictions = generate_decline_prediction(
+                daily_metrics,
+                decline_risk_score,
+                lifecycle_stage
+            )
+            time_to_die = predictions["time_to_critical"]["days_to_red"]
+            if time_to_die:
+                logger.debug(f"✓ Time to RED: {time_to_die} days")
+        except Exception as e:
+            logger.debug(f"⚠ Time-to-decline calculation skipped: {e}")
+        
         # 5. Build response
         response = DeclineSignalResponse(
             trend_id=trend_id,
@@ -225,7 +240,8 @@ async def detect_decline_signals(
             ),
             timestamp=get_iso_timestamp(),
             confidence=confidence,
-            data_quality=data_quality
+            data_quality=data_quality,
+            time_to_die=time_to_die
         )
         
         # 6. Save to MongoDB (if not mock mode)

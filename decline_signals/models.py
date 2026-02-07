@@ -55,6 +55,7 @@ class DeclineSignalResponse(BaseModel):
     timestamp: str  # ISO format with Z
     confidence: str  # "high", "medium", "low"
     data_quality: str = "complete"  # "complete" or "degraded"
+    time_to_die: Optional[int] = None  # Days until RED alert (if declining)
 
 class HealthCheckResponse(BaseModel):
     """Health check response"""

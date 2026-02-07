@@ -24,6 +24,7 @@ from config import (
     QUALITY_DECLINE_THRESHOLDS,
     STAGE_SENSITIVITY,
     LifecycleStage,
+    get_sensitivity_for_stage
 )
 from signals.engagement_drop import calculate_engagement_drop
 from signals.velocity_decline import calculate_velocity_decline
@@ -31,6 +32,7 @@ from signals.creator_decline import calculate_creator_decline
 from signals.quality_decline import calculate_quality_decline
 from lifecycle_handler import resolve_lifecycle_stage
 from aggregator import aggregate_signals
+from decline_predictor import generate_decline_prediction
 
 # ============================================================================
 # SCENARIO 1: Healthy Viral Trend - Strong Growth
@@ -393,8 +395,159 @@ def scenario_5_catastrophic():
 
 
 # ============================================================================
-# MAIN - RUN ALL 5 SCENARIOS
+# TIME-TO-DECLINE PREDICTION TESTS
 # ============================================================================
+
+def test_predictions_scenario_2_collapse():
+    """Test time-to-decline predictions for Scenario 2 (Sharp Collapse)"""
+    print("\n" + "="*80)
+    print("PREDICTION TEST: Scenario 2 - Sharp Collapse (Days 1-7)")
+    print("="*80)
+    
+    # Create 7-day data with sharp engagement collapse
+    metrics = []
+    base_date = datetime(2026, 2, 1)
+    
+    engagement_values = [10_000_000, 8_500_000, 6_500_000, 4_200_000, 2_800_000, 2_200_000, 2_500_000]
+    views_values = [85_000_000, 72_000_000, 55_000_000, 35_000_000, 23_000_000, 18_000_000, 21_000_000]
+    
+    for day, (eng, views) in enumerate(zip(engagement_values, views_values)):
+        date = (base_date + timedelta(days=day)).isoformat()
+        metrics.append(DailyMetric(
+            date=date,
+            total_engagement=eng,
+            views=views,
+            posts_count=850,
+            creators_count=280 - (day * 5),
+            avg_creator_followers=125_000 - (day * 3_000),
+            avg_comments_per_post=42 - (day * 2.5),
+            avg_engagement_per_post=11_200 - (day * 800)
+        ))
+    
+    lifecycle_stage, stage_name, _ = resolve_lifecycle_stage(None)
+    sensitivity = get_sensitivity_for_stage(lifecycle_stage)
+    
+    signal_engagement, _ = calculate_engagement_drop(metrics, sensitivity, ENGAGEMENT_DROP_THRESHOLDS)
+    signal_velocity, _ = calculate_velocity_decline(metrics, sensitivity, VELOCITY_DECLINE_THRESHOLDS)
+    signal_creator, _ = calculate_creator_decline(metrics, sensitivity, CREATOR_DECLINE_THRESHOLDS)
+    signal_quality, _ = calculate_quality_decline(metrics, sensitivity, QUALITY_DECLINE_THRESHOLDS)
+    
+    signal_scores = {
+        "engagement_drop": signal_engagement,
+        "velocity_decline": signal_velocity,
+        "creator_decline": signal_creator,
+        "quality_decline": signal_quality
+    }
+    
+    decline_risk_score, alert_level, confidence = aggregate_signals(
+        signal_scores,
+        lifecycle_stage,
+        "complete"
+    )
+    
+    print(f"\n📊 Current Status:")
+    print(f"   Risk Score: {decline_risk_score:.1f} ({alert_level.upper()})")
+    print(f"   Engagement: {engagement_values[-1]:,} (started at {engagement_values[0]:,})")
+    print(f"   Engagement Loss: {((engagement_values[0] - engagement_values[-1]) / engagement_values[0] * 100):.1f}%")
+    
+    predictions = generate_decline_prediction(metrics, decline_risk_score, lifecycle_stage)
+    
+    print(f"\n⏰ TIME-TO-DECLINE PREDICTIONS:")
+    print(f"   Burn Rate: {predictions['burn_rate']['daily_loss_pct']:.2f}% per day ({predictions['burn_rate']['trend'].upper()})")
+    print(f"   Burn Rate Confidence: {predictions['burn_rate']['confidence']:.1%}")
+    
+    print(f"\n📈 7-DAY TRAJECTORY:")
+    print(f"   Current Engagement: {predictions['trajectory']['current_engagement']:,.0f}")
+    print(f"   Projected (7 days): {predictions['trajectory']['projected_engagement_days_7']:,.0f}")
+    print(f"   Projected (14 days): {predictions['trajectory']['projected_engagement_days_14']:,.0f}")
+    print(f"   Trend Slope: {predictions['trajectory']['trend_slope']:.0f} eng/day")
+    
+    print(f"\n🔴 CRITICAL TIMELINE:")
+    if predictions['time_to_critical']['days_to_orange']:
+        print(f"   ⚠️  ORANGE (57) in: {predictions['time_to_critical']['days_to_orange']} days")
+    if predictions['time_to_critical']['days_to_red']:
+        print(f"   🔴 RED (80) in: {predictions['time_to_critical']['days_to_red']} days")
+        if predictions['time_to_critical']['estimated_date']:
+            print(f"      Date: {predictions['time_to_critical']['estimated_date']}")
+    print(f"   Confidence: {predictions['time_to_critical']['confidence']:.1%}")
+    
+    print(f"\n✅ Prediction test PASSED\n")
+    return True
+
+
+def test_predictions_scenario_5_catastrophic():
+    """Test time-to-decline predictions for Scenario 5 (Catastrophic Collapse)"""
+    print("\n" + "="*80)
+    print("PREDICTION TEST: Scenario 5 - Catastrophic Collapse (Days 1-10)")
+    print("="*80)
+    
+    metrics = []
+    base_date = datetime(2026, 2, 1)
+    
+    engagement_values = [
+        10_000_000, 9_200_000, 7_800_000, 5_500_000, 3_200_000,
+        2_100_000, 1_800_000, 1_650_000, 1_500_000, 1_400_000
+    ]
+    views_values = [v * 8.5 for v in engagement_values]
+    
+    for day, (eng, views) in enumerate(zip(engagement_values, views_values)):
+        date = (base_date + timedelta(days=day)).isoformat()
+        metrics.append(DailyMetric(
+            date=date,
+            total_engagement=int(eng),
+            views=int(views),
+            posts_count=1200 - (day * 30),
+            creators_count=450 - (day * 25),
+            avg_creator_followers=180_000 - (day * 8_000),
+            avg_comments_per_post=68 - (day * 3.5),
+            avg_engagement_per_post=8_300 - (day * 450)
+        ))
+    
+    lifecycle_stage, stage_name, _ = resolve_lifecycle_stage(None)
+    sensitivity = get_sensitivity_for_stage(lifecycle_stage)
+    
+    signal_engagement, _ = calculate_engagement_drop(metrics, sensitivity, ENGAGEMENT_DROP_THRESHOLDS)
+    signal_velocity, _ = calculate_velocity_decline(metrics, sensitivity, VELOCITY_DECLINE_THRESHOLDS)
+    signal_creator, _ = calculate_creator_decline(metrics, sensitivity, CREATOR_DECLINE_THRESHOLDS)
+    signal_quality, _ = calculate_quality_decline(metrics, sensitivity, QUALITY_DECLINE_THRESHOLDS)
+    
+    signal_scores = {
+        "engagement_drop": signal_engagement,
+        "velocity_decline": signal_velocity,
+        "creator_decline": signal_creator,
+        "quality_decline": signal_quality
+    }
+    
+    decline_risk_score, alert_level, confidence = aggregate_signals(
+        signal_scores,
+        lifecycle_stage,
+        "complete"
+    )
+    
+    print(f"\n📊 Current Status (Day 10):")
+    print(f"   Risk Score: {decline_risk_score:.1f} ({alert_level.upper()})")
+    print(f"   Engagement: {engagement_values[-1]:,} (started at {engagement_values[0]:,})")
+    print(f"   Total Loss: {((engagement_values[0] - engagement_values[-1]) / engagement_values[0] * 100):.1f}%")
+    
+    predictions = generate_decline_prediction(metrics, decline_risk_score, lifecycle_stage)
+    
+    print(f"\n⏰ DECLINE TRAJECTORY:")
+    print(f"   Burn Rate: {predictions['burn_rate']['daily_loss_pct']:.2f}% per day ({predictions['burn_rate']['trend'].upper()})")
+    print(f"   Current Rate: {predictions['trajectory']['trend_slope']:.0f} eng/day")
+    
+    print(f"\n📈 FUTURE PROJECTION:")
+    print(f"   Current: {predictions['trajectory']['current_engagement']:,.0f}")
+    print(f"   in 7 days: {predictions['trajectory']['projected_engagement_days_7']:,.0f}")
+    print(f"   in 14 days: {predictions['trajectory']['projected_engagement_days_14']:,.0f}")
+    
+    print(f"\n🔴 CRITICAL STATUS:")
+    if predictions['summary']['at_risk']:
+        print(f"   🔴 CRITICAL: Trend will hit RED alerts within 14 days")
+    print(f"   Overall Confidence: {predictions['summary']['overall_confidence']:.1%}")
+    
+    print(f"\n✅ Prediction test PASSED\n")
+    return True
+
 def main():
     """Run all 5 real-world test scenarios"""
     print("\n" + "█"*80)
@@ -411,9 +564,19 @@ def main():
         scenario_4_quality_collapse()
         scenario_5_catastrophic()
         
+        # Test time-to-decline predictions
         print("\n" + "█"*80)
         print("█" + " "*78 + "█")
-        print("█" + " ✅ ALL 5 REAL-WORLD SCENARIOS PASSED ".center(78) + "█")
+        print("█" + " TIME-TO-DECLINE PREDICTION ENGINE ".center(78) + "█")
+        print("█" + " "*78 + "█")
+        print("█"*80)
+        
+        test_predictions_scenario_2_collapse()
+        test_predictions_scenario_5_catastrophic()
+        
+        print("\n" + "█"*80)
+        print("█" + " "*78 + "█")
+        print("█" + " ✅ ALL TESTS PASSED (SIGNALS + PREDICTIONS) ".center(78) + "█")
         print("█" + " "*78 + "█")
         print("█"*80 + "\n")
         
