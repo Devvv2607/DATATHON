@@ -18,7 +18,11 @@ router = APIRouter(prefix="/api/comeback", tags=["Comeback AI"])
 logger = logging.getLogger(__name__)
 
 # Initialize service
-service = ComebackAIService()
+try:
+    service = ComebackAIService()
+except Exception as e:
+    service = None
+    logger.error(f"❌ ComebackAIService unavailable: {e}")
 
 
 @router.post("/generate", response_model=ComebackResponse)
@@ -57,6 +61,11 @@ async def generate_comeback_content(request: ComebackRequest):
     """
     
     try:
+        if service is None:
+            raise HTTPException(
+                status_code=503,
+                detail="Comeback AI not configured. Please set GROQ_API_KEY in backend/.env",
+            )
         logger.info(f"\n{'='*80}")
         logger.info(f"📥 Received request: {request.trend_name}")
         logger.info(f"{'='*80}")
@@ -66,6 +75,8 @@ async def generate_comeback_content(request: ComebackRequest):
         logger.info(f"✅ Successfully generated content for: {request.trend_name}")
         return response
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"❌ Content generation failed: {e}", exc_info=True)
         raise HTTPException(
@@ -82,10 +93,10 @@ async def health_check():
     
     try:
         # Check if Groq API is configured
-        groq_configured = service.groq_generator is not None
+        groq_configured = service is not None and service.groq_generator is not None
         
         return ComebackHealthResponse(
-            status="healthy",
+            status="healthy" if groq_configured else "unhealthy",
             groq_api_configured=groq_configured,
             last_generation=None
         )
@@ -107,6 +118,11 @@ async def quick_test(trend_name: str = "AI memes"):
     """
     
     try:
+        if service is None:
+            raise HTTPException(
+                status_code=503,
+                detail="Comeback AI not configured. Please set GROQ_API_KEY in backend/.env",
+            )
         request = ComebackRequest(trend_name=trend_name)
         response = await service.generate_comeback_content(request)
         
@@ -120,5 +136,7 @@ async def quick_test(trend_name: str = "AI memes"):
             "remixes_count": len(response.content.remixes),
             "sample_reel": response.content.reels[0].dict() if response.content.reels else None
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

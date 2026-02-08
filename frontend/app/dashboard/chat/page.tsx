@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { Send, Bot, User, TrendingDown, AlertCircle, Lightbulb, BarChart3, Sparkles } from "lucide-react"
+import { Send, Bot, User, TrendingDown, AlertCircle, Lightbulb, BarChart3, Sparkles, Paperclip } from "lucide-react"
 
 // Helper function to render markdown-style text
 const renderMarkdown = (text: string) => {
@@ -41,8 +41,13 @@ export default function ChatPage() {
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [trendName, setTrendName] = useState("")
+  const [contextId, setContextId] = useState<string | null>(null)
+  const [contextFilename, setContextFilename] = useState<string | null>(null)
+  const [isUploadingPdf, setIsUploadingPdf] = useState(false)
+  const [pdfError, setPdfError] = useState<string | null>(null)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const pdfInputRef = useRef<HTMLInputElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -52,17 +57,25 @@ export default function ChatPage() {
     scrollToBottom()
   }, [messages])
 
-  const handleSend = async () => {
-    if (!input.trim()) return
+  useEffect(() => {
+    const storedId = localStorage.getItem("chat_context_id")
+    const storedName = localStorage.getItem("chat_context_filename")
+    if (storedId && storedName) {
+      setContextId(storedId)
+      setContextFilename(storedName)
+    }
+  }, [])
+
+  const sendMessage = async (message: string, contextIdOverride?: string | null) => {
+    if (!message.trim()) return
 
     const userMessage: Message = {
       role: "user",
-      content: input,
+      content: message,
       timestamp: new Date().toISOString()
     }
 
     setMessages(prev => [...prev, userMessage])
-    setInput("")
     setIsLoading(true)
 
     try {
@@ -72,8 +85,9 @@ export default function ChatPage() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          message: input,
+          message,
           trend_name: trendName || null,
+          context_id: contextIdOverride !== undefined ? contextIdOverride : contextId,
           conversation_history: messages.slice(-5)
         })
       })
@@ -104,6 +118,57 @@ export default function ChatPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handlePdfPick = async (file: File | null) => {
+    if (!file) return
+    setPdfError(null)
+    setIsUploadingPdf(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const response = await fetch("http://localhost:8000/api/context/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      const data = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        const detail = data?.detail || "Failed to upload PDF"
+        throw new Error(detail)
+      }
+
+      setContextId(data.context_id)
+      setContextFilename(data.filename)
+      localStorage.setItem("chat_context_id", data.context_id)
+      localStorage.setItem("chat_context_filename", data.filename)
+
+      await sendMessage(
+        "Analyze the attached document. Give a concise summary, key insights, risks, and actionable recommendations. Cite specific parts of the document when possible.",
+        data.context_id
+      )
+    } catch (error: any) {
+      setContextId(null)
+      setContextFilename(null)
+      setPdfError(error?.message || "PDF upload failed")
+      localStorage.removeItem("chat_context_id")
+      localStorage.removeItem("chat_context_filename")
+    } finally {
+      setIsUploadingPdf(false)
+      if (pdfInputRef.current) {
+        pdfInputRef.current.value = ""
+      }
+    }
+  }
+
+  const handleSend = async () => {
+    if (!input.trim()) return
+    const msg = input
+    setInput("")
+    await sendMessage(msg)
   }
 
   const handleFollowup = (followup: string) => {
@@ -406,22 +471,65 @@ export default function ChatPage() {
 
           {/* Input */}
           <div className="flex gap-3">
+            <input
+              ref={pdfInputRef}
+              type="file"
+              accept="application/pdf,.docx,text/plain,text/markdown,.txt,.md"
+              className="hidden"
+              onChange={(e) => handlePdfPick(e.target.files?.[0] || null)}
+            />
+            <Button
+              type="button"
+              onClick={() => pdfInputRef.current?.click()}
+              disabled={isUploadingPdf || isLoading}
+              className="bg-black/30 border border-white/10 hover:border-purple-500/50 rounded-xl px-4 h-12"
+              title={contextFilename ? `Attached: ${contextFilename}` : "Attach document"}
+            >
+              <Paperclip className="w-5 h-5" />
+            </Button>
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about trends, content strategies, or alerts..."
               className="flex-1 bg-black/30 border-white/10 rounded-xl text-white placeholder:text-gray-500 h-12"
-              disabled={isLoading}
+              disabled={isLoading || isUploadingPdf}
             />
             <Button
               onClick={handleSend}
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || isUploadingPdf || !input.trim()}
               className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl px-6 h-12"
             >
               <Send className="w-5 h-5" />
             </Button>
           </div>
+
+          {(contextFilename || pdfError) && (
+            <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+              <div className="text-xs">
+                {contextFilename && (
+                  <span className="text-green-400">Attached: {contextFilename}</span>
+                )}
+                {pdfError && (
+                  <span className="text-red-400">{pdfError}</span>
+                )}
+              </div>
+              {contextId && (
+                <button
+                  onClick={() => {
+                    setContextId(null)
+                    setContextFilename(null)
+                    setPdfError(null)
+                    localStorage.removeItem("chat_context_id")
+                    localStorage.removeItem("chat_context_filename")
+                  }}
+                  className="text-xs text-gray-300 hover:text-red-400"
+                >
+                  Remove document
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Quick Actions */}

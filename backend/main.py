@@ -26,11 +26,13 @@ from comeback_ai.router import router as comeback_router
 from trend_analyzer.router import router as trend_analyzer_router
 from explainable_ai.router import router as explainable_ai_router
 from chatbot.router import router as chatbot_router
+from document_context.router import router as document_context_router
 from social_graph.router import router as social_graph_router
 from auth.router import router as auth_router
 from auth.database import AuthDatabase, auth_db as global_auth_db
 from motor.motor_asyncio import AsyncIOMotorClient
 from business_intelligence.router import router as business_router
+from notifications.router import router as notifications_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -44,7 +46,7 @@ app = FastAPI(
 # CORS Configuration - Allow frontend to communicate
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=settings.allowed_origins_list(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -61,7 +63,9 @@ app.include_router(comeback_router, tags=["Comeback AI - Content Generation"])
 app.include_router(trend_analyzer_router, tags=["Trend Analyzer - Twitter/X Analysis"])
 app.include_router(explainable_ai_router, tags=["Explainable AI - Decision Transparency"])
 app.include_router(chatbot_router, tags=["Chatbot - Unified Interface"])
+app.include_router(document_context_router, tags=["Document Context"])
 app.include_router(social_graph_router, tags=["Social Graph - Reddit Network"])
+app.include_router(notifications_router, tags=["Notifications"])
 
 @app.get("/")
 async def root():

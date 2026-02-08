@@ -3,6 +3,8 @@ Configuration settings for the application
 Uses environment variables with fallback defaults
 """
 
+import json
+
 from pydantic_settings import BaseSettings
 from typing import List
 
@@ -15,11 +17,24 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     
     # CORS Settings
-    ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000"
-    ]
+    # Keep as string to avoid pydantic-settings attempting JSON parsing before validation.
+    # Accepts either:
+    # - comma-separated string: "http://a,http://b"
+    # - JSON array string:      "[\"http://a\",\"http://b\"]"
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000"
+
+    def allowed_origins_list(self) -> List[str]:
+        raw = (self.ALLOWED_ORIGINS or "").strip()
+        if not raw:
+            return []
+        if raw.startswith("["):
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list):
+                    return [str(x).strip() for x in parsed if str(x).strip()]
+            except Exception:
+                return []
+        return [part.strip() for part in raw.split(",") if part.strip()]
     
     # Database (for future implementation)
     DATABASE_URL: str = "sqlite:///./trends.db"

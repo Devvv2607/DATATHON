@@ -9,6 +9,7 @@ from typing import List
 import logging
 from datetime import datetime, timedelta
 import random
+from starlette.concurrency import run_in_threadpool
 
 from decline_signals.models import (
     DeclineSignalRequest,
@@ -31,6 +32,8 @@ from decline_signals.signals.creator_decline import calculate_creator_decline
 from decline_signals.signals.quality_decline import calculate_quality_decline
 from decline_signals.aggregator import aggregate_signals
 from decline_signals.decline_predictor import generate_decline_prediction
+from notifications.service import EmailNotificationService
+from notifications import config as notifications_config
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -82,6 +85,7 @@ class AnalyzeRequest(BaseModel):
     lifecycle_stage: int = 3
     stage_name: str = "Plateau"
     confidence: float = 0.85
+    notify_email: str | None = None
 
 
 @router.post("/analyze", response_model=DeclineSignalResponse)
@@ -249,6 +253,20 @@ async def analyze_decline_signals(request: AnalyzeRequest):
         )
         time_to_die = prediction.get("time_to_critical", {}).get("days_to_critical") if prediction else None
         
+        if time_to_die is not None and time_to_die < 7:
+            to_email = request.notify_email or notifications_config.DEFAULT_ALERT_TO_EMAIL
+            try:
+                service = EmailNotificationService()
+                result = await run_in_threadpool(
+                    service.send_decline_days_alert,
+                    to_email=to_email,
+                    trend_name=trend_name,
+                    days_to_critical=int(time_to_die),
+                )
+                logger.info(f"📧 Decline email notification result: to={to_email}, result={result}")
+            except Exception as e:
+                logger.error(f"❌ Failed to send decline email notification: {e}")
+        
         logger.info(f"   - Days to Critical: {time_to_die} days")
         logger.info(f"   - Full Prediction: {prediction}")
         
@@ -294,8 +312,10 @@ async def analyze_from_lifecycle_output(lifecycle_output: dict):
     ```
     """
     return await analyze_decline_signals(
-        trend_name=lifecycle_output.get("trend_name"),
-        lifecycle_stage=lifecycle_output.get("lifecycle_stage", 3),
-        stage_name=lifecycle_output.get("stage_name", "Plateau"),
-        confidence=lifecycle_output.get("confidence", 0.85)
+        AnalyzeRequest(
+            trend_name=lifecycle_output.get("trend_name"),
+            lifecycle_stage=lifecycle_output.get("lifecycle_stage", 3),
+            stage_name=lifecycle_output.get("stage_name", "Plateau"),
+            confidence=lifecycle_output.get("confidence", 0.85),
+        )
     )

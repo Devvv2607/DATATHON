@@ -9,6 +9,7 @@ import logging
 from .schema import ChatRequest, ChatResponse, StructuredData
 from .intent_classifier import classify_intent
 from .service import ChatbotService
+from document_context.store import get_document_context_store
 
 router = APIRouter(prefix="/api/chat", tags=["Chatbot"])
 logger = logging.getLogger(__name__)
@@ -103,6 +104,26 @@ async def chat(request: ChatRequest):
                 ]
             }
         
+        if request.context_id:
+            stored = get_document_context_store().get(request.context_id)
+            if not stored:
+                return ChatResponse(
+                    success=False,
+                    message="The uploaded PDF context expired or was not found. Please upload the PDF again.",
+                    intent=intent,
+                    structured_data=result.get("structured_data", []),
+                    suggested_followups=result.get("suggested_followups", []),
+                )
+
+            result = chatbot_service.apply_document_context(
+                result=result,
+                user_message=request.message,
+                intent=intent,
+                trend_name=trend_name,
+                document_filename=stored.filename,
+                document_text=stored.text,
+            )
+
         return ChatResponse(
             success=True,
             message=result["message"],

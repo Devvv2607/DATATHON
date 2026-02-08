@@ -18,6 +18,7 @@ class ChatRequest(BaseModel):
     """Request to chat endpoint"""
     message: str
     trend_name: Optional[str] = None
+    context_id: Optional[str] = None
     conversation_history: Optional[List[ChatMessage]] = []
 
 

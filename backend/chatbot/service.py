@@ -26,6 +26,74 @@ class ChatbotService:
         self.trend_analyzer_api = f"{self.base_url}/api/trend-analyzer"
         self.explainable_ai_api = f"{self.base_url}/api/explainable-ai"
         self.comeback_ai_api = f"{self.base_url}/api/comeback/generate"
+
+    def apply_document_context(
+        self,
+        *,
+        result: Dict[str, Any],
+        user_message: str,
+        intent: str,
+        trend_name: Optional[str],
+        document_filename: str,
+        document_text: str,
+    ) -> Dict[str, Any]:
+        if not document_text.strip():
+            return result
+
+        trimmed_doc = document_text.strip()
+        if len(trimmed_doc) > 12000:
+            trimmed_doc = trimmed_doc[:12000]
+
+        if not groq_client:
+            augmented = result.copy()
+            augmented["message"] = (
+                f"{result.get('message', '')}\n\n"
+                f"📎 Document context attached: {document_filename}. "
+                "(Groq is not configured, so I'm not able to fully incorporate the document into the answer.)"
+            ).strip()
+            return augmented
+
+        try:
+            system = (
+                "You are a trend intelligence assistant. "
+                "The user may attach a document (PDF/DOCX/TXT) as extra context. "
+                "Treat it as a business document, not as the abbreviation 'PDF' for other meanings. "
+                "Use the provided document context only if it is relevant. "
+                "If the document is not relevant, say so briefly. "
+                "Do not hallucinate details that are not present in the document or in the structured data. "
+                "Keep the tone concise and actionable."
+            )
+
+            prompt = (
+                f"USER QUESTION:\n{user_message}\n\n"
+                f"INTENT: {intent}\n"
+                f"TREND (if any): {trend_name or 'N/A'}\n\n"
+                f"CURRENT DRAFT ANSWER:\n{result.get('message', '')}\n\n"
+                "STRUCTURED DATA (JSON):\n"
+                f"{result.get('structured_data', [])}\n\n"
+                f"DOCUMENT CONTEXT ({document_filename}) [may be partial]:\n{trimmed_doc}\n\n"
+                "TASK:\n"
+                "Rewrite the answer so it incorporates any relevant document facts/constraints, "
+                "and improve explainability. If the document conflicts with the draft answer, "
+                "call out the conflict and prefer the document."
+            )
+
+            resp = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.4,
+                max_tokens=450,
+            )
+
+            augmented = result.copy()
+            augmented["message"] = (resp.choices[0].message.content or "").strip()
+            return augmented
+        except Exception as e:
+            logger.error(f"Failed to apply document context: {str(e)}")
+            return result
     
     async def handle_why_declining(self, trend_name: str) -> Dict[str, Any]:
         """

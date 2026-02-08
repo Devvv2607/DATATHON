@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import Counter, defaultdict
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Sequence, Set, Tuple
 
 import praw
@@ -41,8 +41,8 @@ MAX_SEARCH_BATCH = 200
 
 def _to_datetime(timestamp: int | float | None) -> datetime:
     if not timestamp:
-        return datetime.now(tz=UTC)
-    return datetime.fromtimestamp(float(timestamp), tz=UTC)
+        return datetime.now(tz=timezone.utc)
+    return datetime.fromtimestamp(float(timestamp), tz=timezone.utc)
 
 
 def _normalize_author(author: str | None) -> str:
@@ -241,7 +241,7 @@ async def fetch_reddit_graph(payload: RedditGraphRequest) -> SocialGraphResponse
     if time_range not in TIME_RANGE_TO_DAYS:
         raise ValueError("Unsupported time range")
 
-    end_dt = datetime.now(tz=UTC)
+    end_dt = datetime.now(tz=timezone.utc)
     start_dt = end_dt - timedelta(days=TIME_RANGE_TO_DAYS[time_range])
 
     try:
