@@ -107,10 +107,35 @@ export default function CampaignTimingPage() {
 
       {timing && (
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-xl font-bold text-white mb-4">Timing Analysis</h2>
-          <pre className="text-gray-300 text-sm overflow-auto">
-            {JSON.stringify(timing, null, 2)}
-          </pre>
+          <div className="space-y-4">
+            <div className="p-4 rounded-xl bg-slate-800/50">
+              <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Domain</div>
+              <div className="text-white font-medium">{timing.domain}</div>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-800/50">
+              <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Trend</div>
+              <div className="text-white font-medium">{timing.trend}</div>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-800/50">
+              <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Primary Hashtag</div>
+              <div className="text-blue-400 font-medium">{timing.timing?.primary_hashtag || 'N/A'}</div>
+            </div>
+            {timing.timing?.optimal_posting_times && (
+              <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+                <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Peak Engagement Window</div>
+                <div className="text-green-400 text-lg font-semibold">
+                  {timing.timing.optimal_posting_times.window || 'See recommended times above'}
+                </div>
+              </div>
+            )}
+            {timing.success !== undefined && (
+              <div className="inline-flex px-3 py-1 rounded-full text-sm font-medium mt-4 ${
+                timing.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+              }">
+                {timing.success ? 'Analysis Complete' : 'Analysis Failed'}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

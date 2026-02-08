@@ -23,7 +23,8 @@ import {
   FileText,
   Calendar,
   GitBranch,
-  Database
+  Database,
+  Zap
 } from 'lucide-react';
 
 const generalNavigation = [
@@ -42,6 +43,7 @@ const generalNavigation = [
 const businessNavigation = [
   { name: 'Business Data', href: '/dashboard/business/business-data', icon: Database },
   { name: 'ROI Dashboard', href: '/dashboard/business/roi-analysis', icon: DollarSign },
+  { name: 'What-If Simulator', href: '/dashboard/business/what-if-simulator', icon: Zap },
   { name: 'Investment Decisions', href: '/dashboard/business/investment-decisions', icon: TrendingUp },
   { name: 'Executive Summary', href: '/dashboard/business/executive-summary', icon: FileText },
   { name: 'Campaign Timing', href: '/dashboard/business/campaign-timing', icon: Calendar },

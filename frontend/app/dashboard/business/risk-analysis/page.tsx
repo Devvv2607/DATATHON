@@ -122,12 +122,47 @@ export default function RiskAnalysisPage() {
         </div>
       </div>
 
-      {scenarios && (
+      {scenarios && scenarios.scenarios?.decision_levers && (
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-xl font-bold text-white mb-4">Scenario Analysis</h2>
-          <pre className="text-gray-300 text-sm overflow-auto">
-            {JSON.stringify(scenarios, null, 2)}
-          </pre>
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
+            <Shield className="w-6 h-6 text-blue-400" />
+            Risk Management Strategy
+          </h2>
+          <div className="space-y-4">
+            {scenarios.scenarios.decision_levers.risk_reduction && (
+              <div className="p-6 rounded-xl bg-green-500/10 border border-green-500/20">
+                <div className="text-sm text-green-400 font-semibold uppercase tracking-wider mb-2">Risk Reduction</div>
+                <div className="text-gray-200 text-lg leading-relaxed">
+                  {scenarios.scenarios.decision_levers.risk_reduction.join(', ')}
+                </div>
+              </div>
+            )}
+            {scenarios.scenarios.decision_levers.risk_escalation && (
+              <div className="p-6 rounded-xl bg-red-500/10 border border-red-500/20">
+                <div className="text-sm text-red-400 font-semibold uppercase tracking-wider mb-2">Risk Escalation</div>
+                <div className="text-gray-200 text-lg leading-relaxed">
+                  {scenarios.scenarios.decision_levers.risk_escalation.join(', ')}
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-slate-800/50">
+                <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Domain</div>
+                <div className="text-white font-medium">{scenarios.domain}</div>
+              </div>
+              <div className="p-4 rounded-xl bg-slate-800/50">
+                <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Trend</div>
+                <div className="text-white font-medium">{scenarios.trend}</div>
+              </div>
+            </div>
+            {scenarios.success !== undefined && (
+              <div className="inline-flex px-3 py-1 rounded-full text-sm font-medium ${
+                scenarios.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+              }">
+                {scenarios.success ? 'Analysis Complete' : 'Analysis Failed'}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

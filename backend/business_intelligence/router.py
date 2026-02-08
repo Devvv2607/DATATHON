@@ -353,3 +353,160 @@ async def analyze_risk_scenarios(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/what-if-simulator")
+async def run_what_if_simulation(
+    request: dict,
+    domain: str = Query("technology", description="Business domain key"),
+    trend_id: str = Query("trend_1", description="Trend ID to analyze"),
+    include_executive_summary: bool = Query(True, description="Include detailed executive summary"),
+    current_user: dict = Depends(require_business_user)
+) -> Dict[str, Any]:
+    """
+    Run What-If scenario simulation for campaign planning
+    
+    Integrates with What-If Simulator to provide:
+    - Range-based growth projections (engagement, reach, creator participation)
+    - ROI probabilities with confidence intervals
+    - Risk trajectory analysis
+    - Strategic recommendations (scale/test_small/monitor/avoid)
+    - Sensitivity analysis for key assumptions
+    - Optional executive summary
+    """
+    try:
+        # Import simulator modules
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../src'))
+        from what_if_simulator.simulator import WhatIfSimulator
+        from what_if_simulator.types import (
+            ScenarioInput, TrendContext, CampaignStrategy, 
+            Assumptions, Constraints
+        )
+        from what_if_simulator.external_systems import (
+            ExternalSystemsClient,
+            MockTrendLifecycleEngine,
+            MockEarlyDeclineDetection,
+            MockROIAttribution
+        )
+        from dataclasses import asdict
+        
+        # Get real trend data
+        trends = trend_service.get_all_trends()
+        trend_data = next((t for t in trends if t["id"] == trend_id), trends[0] if trends else {})
+        
+        # Calculate metrics for simulator
+        health_score = trend_data.get("metrics", {}).get("health_score", 70)
+        risk_score = 100 - health_score
+        
+        # Map trend status to lifecycle stage
+        lifecycle_map = {
+            "emerging": "emerging",
+            "growing": "growth",
+            "peak": "peak",
+            "declining": "decline",
+            "dormant": "dormant"
+        }
+        trend_status = trend_data.get("status", "growing").lower()
+        lifecycle_stage = lifecycle_map.get(trend_status, "growth")
+        
+        # Determine confidence level
+        if health_score > 70:
+            confidence = "high"
+        elif health_score > 50:
+            confidence = "medium"
+        else:
+            confidence = "low"
+        
+        # Build TrendContext
+        trend_context = TrendContext(
+            trend_id=trend_id,
+            trend_name=trend_data.get("name", "Unknown Trend"),
+            platform=trend_data.get("platforms", ["Twitter"])[0] if trend_data.get("platforms") else "Twitter",
+            lifecycle_stage=lifecycle_stage,
+            current_risk_score=risk_score,
+            confidence=confidence
+        )
+        
+        # Build CampaignStrategy from request
+        campaign_strategy = CampaignStrategy(
+            campaign_type=request.get("campaign_type", "mixed"),
+            budget_range=request.get("budget_range", "medium"),
+            campaign_duration_days=request.get("campaign_duration_days", 30),
+            creator_tier=request.get("creator_tier", "mixed"),
+            content_intensity=request.get("content_intensity", "medium")
+        )
+        
+        # Build Assumptions from request
+        assumptions = Assumptions(
+            engagement_trend=request.get("engagement_trend", "neutral"),
+            creator_participation=request.get("creator_participation", "stable"),
+            market_noise=request.get("market_noise", "medium")
+        )
+        
+        # Build Constraints from request
+        constraints = Constraints(
+            risk_tolerance=request.get("risk_tolerance", "medium"),
+            max_budget_cap=request.get("max_budget_cap", 50000)
+        )
+        
+        # Create ScenarioInput
+        scenario = ScenarioInput(
+            scenario_id=request.get("scenario_id", f"{trend_id}_{domain}_scenario"),
+            trend_context=trend_context,
+            campaign_strategy=campaign_strategy,
+            assumptions=assumptions,
+            constraints=constraints
+        )
+        
+        # Initialize simulator with mock external systems
+        external_systems = ExternalSystemsClient(
+            trend_lifecycle_engine=MockTrendLifecycleEngine(),
+            early_decline_detection=MockEarlyDeclineDetection(),
+            roi_attribution=MockROIAttribution()
+        )
+        simulator = WhatIfSimulator(external_systems)
+        
+        # Run simulation
+        simulation_result = simulator.simulate(scenario, include_executive_summary=include_executive_summary)
+        
+        # Check for validation errors
+        if hasattr(simulation_result, 'error_code'):
+            return {
+                "success": False,
+                "error_code": simulation_result.error_code,
+                "error_message": simulation_result.error_message,
+                "validation_failures": [
+                    {
+                        "field": failure.field,
+                        "message": failure.message,
+                        "guidance": failure.guidance
+                    }
+                    for failure in simulation_result.validation_failures
+                ],
+                "domain": BUSINESS_DOMAINS[domain]["name"],
+                "trend": trend_data.get("name"),
+                "user": current_user["full_name"]
+            }
+        
+        # Convert dataclass to dict
+        result_dict = asdict(simulation_result)
+        
+        return {
+            "success": True,
+            "domain": BUSINESS_DOMAINS[domain]["name"],
+            "trend": trend_data.get("name"),
+            "trend_id": trend_id,
+            "simulation": result_dict,
+            "user": current_user["full_name"],
+            "timestamp": "2026-02-08"
+        }
+        
+    except Exception as e:
+        import traceback
+        return {
+            "success": False,
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+            "domain": BUSINESS_DOMAINS.get(domain, {}).get("name", domain),
+            "user": current_user.get("full_name", "Unknown")
+        }
+
+

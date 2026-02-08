@@ -115,10 +115,10 @@ export default function InvestmentDecisionsPage() {
                 <div className="text-2xl">🎯</div>
               </div>
               <div className="text-2xl font-bold text-blue-400 mb-2">
-                {decision.decision.investment_decision?.recommended_action || 'N/A'}
+                {decision.decision?.recommended_action || 'N/A'}
               </div>
               <div className="text-gray-300 leading-relaxed">
-                {decision.decision.investment_decision?.explanation || 'No explanation available'}
+                {decision.decision?.explanation || 'No explanation available'}
               </div>
             </div>
 
@@ -126,13 +126,13 @@ export default function InvestmentDecisionsPage() {
               <div className="p-4 rounded-xl bg-slate-800/50">
                 <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">ROI</div>
                 <div className="text-2xl font-bold text-green-400">
-                  {decision.decision.investment_decision?.roi ? `${(decision.decision.investment_decision.roi * 100).toFixed(1)}%` : 'N/A'}
+                  {decision.decision?.roi ? `${(decision.decision.roi * 100).toFixed(1)}%` : 'N/A'}
                 </div>
               </div>
               <div className="p-4 rounded-xl bg-slate-800/50">
                 <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Risk Level</div>
                 <div className="text-2xl font-bold text-orange-400">
-                  {decision.decision.investment_decision?.risk_level ? `${(decision.decision.investment_decision.risk_level * 100).toFixed(0)}%` : 'N/A'}
+                  {decision.decision?.risk_level ? `${(decision.decision.risk_level * 100).toFixed(0)}%` : 'N/A'}
                 </div>
               </div>
             </div>

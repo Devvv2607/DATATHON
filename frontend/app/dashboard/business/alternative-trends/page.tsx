@@ -118,12 +118,36 @@ export default function AlternativeTrendsPage() {
         )}
       </div>
 
-      {alternatives && (
+      {alternatives && alternatives.alternatives?.strategy && (
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-xl font-bold text-white mb-4">Alternative Trends</h2>
-          <pre className="text-gray-300 text-sm overflow-auto">
-            {JSON.stringify(alternatives, null, 2)}
-          </pre>
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
+            <TrendingUp className="w-6 h-6 text-blue-400" />
+            Pivot Strategy
+          </h2>
+          <div className="space-y-4">
+            <div className="p-6 rounded-xl bg-gradient-to-br from-purple-500/10 to-blue-500/5 border border-purple-500/20">
+              <div className="text-gray-300 text-lg leading-relaxed">
+                {alternatives.alternatives.strategy}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-slate-800/50">
+                <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Current Domain</div>
+                <div className="text-white font-medium">{alternatives.domain}</div>
+              </div>
+              <div className="p-4 rounded-xl bg-slate-800/50">
+                <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Current Trend</div>
+                <div className="text-white font-medium">{alternatives.current_trend}</div>
+              </div>
+            </div>
+            {alternatives.success !== undefined && (
+              <div className="inline-flex px-3 py-1 rounded-full text-sm font-medium ${
+                alternatives.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+              }">
+                {alternatives.success ? 'Analysis Complete' : 'Analysis Failed'}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
