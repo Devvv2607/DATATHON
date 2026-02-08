@@ -34,10 +34,10 @@ const generalNavigation = [
   { name: 'Comeback AI', href: '/dashboard/comeback', icon: Sparkles },
   { name: 'Chat Assistant', href: '/dashboard/chat', icon: MessageCircle },
   { name: 'Social Graph', href: '/dashboard/social-graph', icon: Share2 },
-  { name: 'Explainability', href: '/dashboard/explainability', icon: Brain },
-  { name: 'What-If Simulator', href: '/dashboard/simulator', icon: Sliders },
-  { name: 'Network Analysis', href: '/dashboard/network', icon: Network },
-  { name: 'Strategy & ROI', href: '/dashboard/strategy', icon: Lightbulb },
+//   { name: 'Explainability', href: '/dashboard/explainability', icon: Brain },
+//   { name: 'What-If Simulator', href: '/dashboard/simulator', icon: Sliders },
+//   { name: 'Network Analysis', href: '/dashboard/network', icon: Network },
+//   { name: 'Strategy & ROI', href: '/dashboard/strategy', icon: Lightbulb },
 ];
 
 const businessNavigation = [

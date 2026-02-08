@@ -5,6 +5,7 @@ import { GitBranch, TrendingUp, ArrowRight } from 'lucide-react';
 import { useDomain } from '@/contexts/DomainContext';
 import DomainAndTrendSelector from '@/components/DomainAndTrendSelector';
 
+
 export default function AlternativeTrendsPage() {
   const [loading, setLoading] = useState(false);
   const [alternatives, setAlternatives] = useState<any>(null);
