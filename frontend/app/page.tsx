@@ -84,7 +84,7 @@ export default function Home() {
             </h1>
 
             {/* Spline 3D Widget */}
-            <div className="w-full h-[500px] my-12 rounded-3xl overflow-hidden relative border border-slate-800/50 bg-transparent">
+            <div className="w-full h-[500px] my-12 rounded-3xl overflow-hidden relative border border-slate-800/50 bg-transparent ">
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none z-10" />
               <iframe 
                 src="https://my.spline.design/widgetlytic-8MS7r1cHtOKxFl2NG9EH5xFR-5MO/"

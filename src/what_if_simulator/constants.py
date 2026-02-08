@@ -66,12 +66,12 @@ COMPATIBILITY_MATRIX: Dict[Tuple[str, str], Tuple[bool, bool]] = {
     ("decline", "short_term_influencer"): (True, True),
     ("decline", "long_term_paid"): (False, True),
     ("decline", "organic_only"): (True, True),
-    ("decline", "mixed"): (False, True),
+    ("decline", "mixed"): (True, True),  # Allow mixed but high-risk
     # Dormant stage
     ("dormant", "short_term_influencer"): (True, True),
     ("dormant", "long_term_paid"): (False, True),
     ("dormant", "organic_only"): (True, True),
-    ("dormant", "mixed"): (False, True),
+    ("dormant", "mixed"): (True, True),  # Allow mixed but high-risk
 }
 
 # Default assumptions
