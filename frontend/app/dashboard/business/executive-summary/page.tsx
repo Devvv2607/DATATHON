@@ -101,10 +101,39 @@ export default function ExecutiveSummaryPage() {
         
       {summary && (
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-xl font-bold text-white mb-4">API Response</h2>
-          <pre className="text-gray-300 text-sm overflow-auto">
-            {JSON.stringify(summary, null, 2)}
-          </pre>
+          <h2 className="text-xl font-bold text-white mb-4">Full Analysis</h2>
+          <div className="space-y-4">
+            <div className="p-4 rounded-xl bg-slate-800/50">
+              <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Domain</div>
+              <div className="text-white font-medium">{summary.domain}</div>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-800/50">
+              <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Trend</div>
+              <div className="text-white font-medium">{summary.trend}</div>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-800/50">
+              <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Executive Summary</div>
+              <div className="text-white leading-relaxed">{summary.summary?.executive_summary || 'No summary available'}</div>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-800/50">
+              <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Recommendation</div>
+              <div className="text-white leading-relaxed">{summary.summary?.recommendation || 'No recommendation available'}</div>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-800/50">
+              <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">User</div>
+              <div className="text-white">{summary.user}</div>
+            </div>
+            {summary.success !== undefined && (
+              <div className="p-4 rounded-xl bg-slate-800/50">
+                <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Status</div>
+                <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
+                  summary.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                }`}>
+                  {summary.success ? 'Success' : 'Failed'}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

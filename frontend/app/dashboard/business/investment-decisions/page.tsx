@@ -105,12 +105,54 @@ export default function InvestmentDecisionsPage() {
         </div>
       </div>
 
-      {decision && (
+      {decision?.decision && (
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-xl font-bold text-white mb-4">Decision Analysis</h2>
-          <pre className="text-gray-300 text-sm overflow-auto">
-            {JSON.stringify(decision, null, 2)}
-          </pre>
+          <h2 className="text-xl font-bold text-white mb-6">Decision Analysis</h2>
+          <div className="space-y-4">
+            <div className="p-6 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-gray-400 uppercase tracking-wider">Recommended Action</div>
+                <div className="text-2xl">🎯</div>
+              </div>
+              <div className="text-2xl font-bold text-blue-400 mb-2">
+                {decision.decision.investment_decision?.recommended_action || 'N/A'}
+              </div>
+              <div className="text-gray-300 leading-relaxed">
+                {decision.decision.investment_decision?.explanation || 'No explanation available'}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-slate-800/50">
+                <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">ROI</div>
+                <div className="text-2xl font-bold text-green-400">
+                  {decision.decision.investment_decision?.roi ? `${(decision.decision.investment_decision.roi * 100).toFixed(1)}%` : 'N/A'}
+                </div>
+              </div>
+              <div className="p-4 rounded-xl bg-slate-800/50">
+                <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Risk Level</div>
+                <div className="text-2xl font-bold text-orange-400">
+                  {decision.decision.investment_decision?.risk_level ? `${(decision.decision.investment_decision.risk_level * 100).toFixed(0)}%` : 'N/A'}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-800/50">
+              <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Domain & Trend</div>
+              <div className="text-white font-medium">{decision.domain} · {decision.trend}</div>
+            </div>
+
+            {decision.success !== undefined && (
+              <div className="p-4 rounded-xl bg-slate-800/50">
+                <div className="text-sm text-gray-400 uppercase tracking-wider mb-2">Status</div>
+                <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
+                  decision.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                }`}>
+                  {decision.success ? 'Analysis Complete' : 'Analysis Failed'}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
