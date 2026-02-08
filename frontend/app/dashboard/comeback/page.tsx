@@ -5,6 +5,23 @@ import { Sparkles, Search, TrendingUp, Video, MessageSquare, Repeat, Target, Shi
 import { generateComebackContent, ComebackResponse } from '@/lib/comeback-api';
 
 export default function ComebackAIPage() {
+  const getCachedResult = (trendName: string) => {
+    if (typeof window === 'undefined') return null;
+    const cached = localStorage.getItem(`comeback_${trendName}`);
+    if (cached) {
+      try {
+        const { result, timestamp } = JSON.parse(cached);
+        // Use cache if less than 1 hour old
+        if (Date.now() - timestamp < 60 * 60 * 1000) {
+          return result;
+        }
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ComebackResponse | null>(null);
@@ -17,17 +34,33 @@ export default function ComebackAIPage() {
       return;
     }
 
-    setLoading(true);
+    const trendName = searchQuery.trim();
+    
+    // Check cache first
+    const cachedResult = getCachedResult(trendName);
+    if (cachedResult) {
+      setResult(cachedResult);
+      setError(null);
+    }
+
+    setLoading(!cachedResult);
     setError(null);
-    setResult(null);
 
     try {
       const response = await generateComebackContent({
-        trend_name: searchQuery.trim(),
+        trend_name: trendName,
       });
       setResult(response);
+      
+      // Cache the result
+      localStorage.setItem(`comeback_${trendName}`, JSON.stringify({
+        result: response,
+        timestamp: Date.now()
+      }));
     } catch (err: any) {
-      setError(err.message || 'Failed to generate content');
+      if (!cachedResult) {
+        setError(err.message || 'Failed to generate content');
+      }
       console.error('Comeback generation error:', err);
     } finally {
       setLoading(false);

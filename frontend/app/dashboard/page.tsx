@@ -20,15 +20,46 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function loadData() {
-      setLoading(true);
-      const { trends: data } = await fetchTrends();
-      setTrends(data);
-      if (data.length > 0) {
-        setSelectedTrend(data[0]);
-        const pred = await predictDecline(data[0].id);
-        setPrediction(pred);
+      // Try to load cached data first
+      const cachedTrends = localStorage.getItem('dashboard_trends');
+      const cachedPrediction = localStorage.getItem('dashboard_prediction');
+      const cachedTimestamp = localStorage.getItem('dashboard_timestamp');
+      
+      // Show cached data immediately if available
+      if (cachedTrends) {
+        const parsedTrends = JSON.parse(cachedTrends);
+        setTrends(parsedTrends);
+        if (parsedTrends.length > 0) {
+          setSelectedTrend(parsedTrends[0]);
+          if (cachedPrediction) {
+            setPrediction(JSON.parse(cachedPrediction));
+          }
+        }
+        setLoading(false);
       }
-      setLoading(false);
+
+      // Fetch fresh data in background
+      try {
+        const { trends: data } = await fetchTrends();
+        setTrends(data);
+        
+        // Cache the fresh data
+        localStorage.setItem('dashboard_trends', JSON.stringify(data));
+        localStorage.setItem('dashboard_timestamp', Date.now().toString());
+        
+        if (data.length > 0) {
+          setSelectedTrend(data[0]);
+          const pred = await predictDecline(data[0].id);
+          setPrediction(pred);
+          
+          // Cache prediction
+          localStorage.setItem('dashboard_prediction', JSON.stringify(pred));
+        }
+      } catch (error) {
+        console.error('Error loading trends:', error);
+      } finally {
+        setLoading(false);
+      }
     }
     loadData();
   }, []);

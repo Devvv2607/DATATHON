@@ -102,11 +102,11 @@ export function TrendCard({ trend, onClick }: TrendCardProps) {
           </div>
           
           {/* Velocity indicator */}
-          {trend.metrics.velocity !== undefined && (
+          {(trend.metrics as any).velocity !== undefined && (
             <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-[#84CC16] animate-pulse" />
               <span className="text-xs text-[#9CA3AF] font-mono">
-                {trend.metrics.velocity.toFixed(1)}
+                {(trend.metrics as any).velocity.toFixed(1)}
               </span>
             </div>
           )}

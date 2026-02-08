@@ -34,6 +34,23 @@ const RANGE_OPTIONS: { value: "day" | "month" | "year"; label: string }[] = [
 ]
 
 export default function SocialGraphPage() {
+  const getCachedGraph = (keyword: string, timeRange: string) => {
+    if (typeof window === 'undefined') return null;
+    const cached = localStorage.getItem(`social_graph_${keyword}_${timeRange}`);
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        // Use cache if less than 2 hours old
+        if (Date.now() - timestamp < 2 * 60 * 60 * 1000) {
+          return data;
+        }
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const [keyword, setKeyword] = useState("")
   const [timeRange, setTimeRange] = useState<"day" | "month" | "year">("day")
   const [graphData, setGraphData] = useState<RedditSocialGraphResponse | null>(null)
@@ -44,7 +61,6 @@ export default function SocialGraphPage() {
 
   const runQuery = useCallback(async () => {
     setError(null)
-    setLoading(true)
     setSelectedNode(null)
 
     try {
@@ -52,6 +68,14 @@ export default function SocialGraphPage() {
       if (!trimmedKeyword) {
         throw new Error("Enter a keyword to search on Reddit.")
       }
+
+      // Check cache first
+      const cachedData = getCachedGraph(trimmedKeyword, timeRange);
+      if (cachedData) {
+        setGraphData(cachedData);
+      }
+
+      setLoading(!cachedData);
 
       const payload = {
         keyword: trimmedKeyword,
@@ -76,10 +100,18 @@ export default function SocialGraphPage() {
 
       const data = await response.json()
       setGraphData(data)
+      
+      // Cache the result
+      localStorage.setItem(`social_graph_${trimmedKeyword}_${timeRange}`, JSON.stringify({
+        data,
+        timestamp: Date.now()
+      }));
     } catch (err) {
       console.error(err)
-      setGraphData(null)
-      setError(err instanceof Error ? err.message : "Unable to fetch Reddit data.")
+      if (!graphData) {
+        setGraphData(null);
+        setError(err instanceof Error ? err.message : "Unable to fetch Reddit data.")
+      }
     } finally {
       setLoading(false)
     }
@@ -99,7 +131,7 @@ export default function SocialGraphPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-3 rounded-2xl glass-card shimmer">
+            <div className="p-3 rounded-2xl glass-card">
               <Sparkles className="w-6 h-6 text-cyan-400" />
             </div>
             <div>
@@ -151,7 +183,7 @@ export default function SocialGraphPage() {
 
             <button
               type="submit"
-              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 shimmer rounded-xl px-6 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 rounded-xl px-6 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
               disabled={loading}
             >
               {loading ? (

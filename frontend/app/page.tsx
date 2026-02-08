@@ -28,7 +28,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden z-10">
         
         <div className="relative max-w-7xl mx-auto px-6 py-24 sm:py-32">
           {/* Navigation */}
@@ -57,7 +57,7 @@ export default function Home() {
 
           {/* Hero Content */}
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-strong mb-8 float">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-strong mb-8">
               <Sparkles className="w-4 h-4 text-blue-400" />
               <span className="text-sm text-blue-300 font-medium">AI-Powered Trend Intelligence</span>
             </div>
@@ -137,7 +137,7 @@ export default function Home() {
       </div>
 
       {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-6 py-24">
+      <div className="max-w-7xl mx-auto px-6 py-24 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">Why Choose TrendPulse?</h2>
           <p className="text-slate-400 text-lg">Transform raw social data into actionable insights</p>
@@ -191,7 +191,7 @@ export default function Home() {
       </div>
 
       {/* Problem Statement */}
-      <div className="max-w-7xl mx-auto px-6 py-24">
+      <div className="max-w-7xl mx-auto px-6 py-24 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 mb-6">
@@ -277,7 +277,7 @@ export default function Home() {
       </div>
 
       {/* CTA Section */}
-      <div className="max-w-4xl mx-auto px-6 py-24">
+      <div className="max-w-4xl mx-auto px-6 py-24 relative z-10">
         <div className="relative overflow-hidden rounded-xl border border-[#374151] bg-[#151922] p-12 text-center">
           {/* Subtle gradient overlay to match chart style */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#3B82F6]/5 via-transparent to-[#8B5CF6]/5 pointer-events-none" />
@@ -300,7 +300,7 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="relative border-t border-white/5 py-12">
+      <footer className="relative border-t border-white/5 py-12 z-10">
         <div className="max-w-7xl mx-auto px-6 text-center text-slate-400">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="p-1.5 rounded-xl glass-strong">

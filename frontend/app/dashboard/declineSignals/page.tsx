@@ -22,6 +22,23 @@ interface DeclineSignalResponse {
 }
 
 export default function DeclineSignalsPage() {
+  const getCachedResult = (trendName: string) => {
+    if (typeof window === 'undefined') return null;
+    const cached = localStorage.getItem(`decline_signals_${trendName}`);
+    if (cached) {
+      try {
+        const { result, timestamp } = JSON.parse(cached);
+        // Use cache if less than 1 hour old
+        if (Date.now() - timestamp < 60 * 60 * 1000) {
+          return result;
+        }
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DeclineSignalResponse | null>(null);
@@ -91,15 +108,23 @@ export default function DeclineSignalsPage() {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 
-    setLoading(true);
-    setTrendName(searchQuery);
+    const trendName = searchQuery.trim();
+    setTrendName(trendName);
+    
+    // Check cache first
+    const cachedResult = getCachedResult(trendName);
+    if (cachedResult) {
+      setResult(cachedResult);
+    }
+
+    setLoading(!cachedResult);
     
     try {
       // First, get lifecycle data
       const lifecycleResponse = await fetch('http://localhost:8000/api/trend/lifecycle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trend_name: searchQuery })
+        body: JSON.stringify({ trend_name: trendName })
       });
 
       if (!lifecycleResponse.ok) throw new Error('Lifecycle analysis failed');
@@ -123,9 +148,17 @@ export default function DeclineSignalsPage() {
       const declineData = await declineResponse.json();
       setResult(declineData);
       
+      // Cache the result
+      localStorage.setItem(`decline_signals_${trendName}`, JSON.stringify({
+        result: declineData,
+        timestamp: Date.now()
+      }));
+      
     } catch (error) {
       console.error('Analysis failed:', error);
-      alert('Analysis failed. Please try again.');
+      if (!cachedResult) {
+        alert('Analysis failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

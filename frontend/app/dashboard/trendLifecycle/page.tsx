@@ -9,12 +9,30 @@ import { TrendingUp, TrendingDown, Activity, Users, Target, Search } from 'lucid
 export default function TrendLifecyclePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [trendData, setTrendData] = useState<TrendDetails | null>(null);
+  
+  // Initialize with cached data if available
+  const defaultTrend = 'Ice Bucket Challenge';
+  const getCachedData = () => {
+    if (typeof window === 'undefined') return null;
+    const cached = localStorage.getItem(`lifecycle_${defaultTrend}`);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  };
+  
+  const initialCache = getCachedData();
+  
+  const [trendData, setTrendData] = useState<TrendDetails | null>(initialCache?.trendData || null);
   const [trajectoryData, setTrajectoryData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [trendName, setTrendName] = useState<string>('Ice Bucket Challenge');
+  const [loading, setLoading] = useState(!initialCache);
+  const [trendName, setTrendName] = useState<string>(defaultTrend);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [lifecycleResult, setLifecycleResult] = useState<any>(null);
+  const [lifecycleResult, setLifecycleResult] = useState<any>(initialCache?.result || null);
 
   const generateTrajectoryFromStage = (stage: number, confidence: number) => {
     // Generate 60 days of data based on lifecycle stage
@@ -70,12 +88,20 @@ export default function TrendLifecyclePage() {
         
         // Generate mock trajectory data based on stage for visualization
         const mockTrajectory = generateTrajectoryFromStage(result.lifecycle_stage, result.confidence);
-        setTrendData({
+        const trendDataObj = {
           trend_id: result.trend_id,
           name: result.trend_name,
           engagement_history: mockTrajectory.engagement_history,
           sentiment_history: mockTrajectory.sentiment_history
-        } as any);
+        };
+        setTrendData(trendDataObj as any);
+        
+        // Cache the result
+        localStorage.setItem(`lifecycle_${trendName}`, JSON.stringify({
+          result,
+          trendData: trendDataObj,
+          timestamp: Date.now()
+        }));
       }
     } catch (error) {
       console.error('Analysis failed:', error);
@@ -87,26 +113,41 @@ export default function TrendLifecyclePage() {
   useEffect(() => {
     // Load initial default trend on mount
     const loadInitialTrend = async () => {
-      setLoading(true);
+      const defaultTrend = 'Ice Bucket Challenge';
+      
+      // If no cached data, show loading
+      if (!initialCache) {
+        setLoading(true);
+      }
+      
+      // Fetch fresh data
       try {
         const response = await fetch('http://localhost:8000/api/trend/lifecycle', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ trend_name: 'Ice Bucket Challenge' })
+          body: JSON.stringify({ trend_name: defaultTrend })
         });
         
         if (response.ok) {
           const result = await response.json();
           setLifecycleResult(result);
-          setTrendName('Ice Bucket Challenge');
+          setTrendName(defaultTrend);
           
           const mockTrajectory = generateTrajectoryFromStage(result.lifecycle_stage, result.confidence);
-          setTrendData({
+          const trendDataObj = {
             trend_id: result.trend_id,
             name: result.trend_name,
             engagement_history: mockTrajectory.engagement_history,
             sentiment_history: mockTrajectory.sentiment_history
-          } as any);
+          };
+          setTrendData(trendDataObj as any);
+          
+          // Update cache
+          localStorage.setItem(`lifecycle_${defaultTrend}`, JSON.stringify({
+            result,
+            trendData: trendDataObj,
+            timestamp: Date.now()
+          }));
         }
       } catch (error) {
         console.error('Initial load failed:', error);
