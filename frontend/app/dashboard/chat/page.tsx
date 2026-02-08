@@ -197,7 +197,7 @@ export default function ChatPage() {
     return (
       <div className="glass-card p-5 mt-3 rounded-2xl border border-yellow-500/30">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-xl bg-yellow-500/20 shimmer">
+          <div className="p-2 rounded-xl bg-yellow-500/20">
             <Lightbulb className="w-5 h-5 text-yellow-400" />
           </div>
           <h4 className="font-semibold text-white text-base">Content Ideas</h4>
@@ -297,7 +297,7 @@ export default function ChatPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-3 rounded-2xl glass-card shimmer">
+            <div className="p-3 rounded-2xl glass-card">
               <Sparkles className="w-6 h-6 text-purple-400" />
             </div>
             <div>
@@ -334,8 +334,8 @@ export default function ChatPage() {
                   {/* Avatar */}
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
                     msg.role === "user" 
-                      ? "bg-gradient-to-br from-blue-500 to-blue-600 shimmer" 
-                      : "bg-gradient-to-br from-purple-500 to-pink-500 shimmer"
+                      ? "bg-gradient-to-br from-blue-500 to-blue-600" 
+                      : "bg-gradient-to-br from-purple-500 to-pink-500"
                   }`}>
                     {msg.role === "user" ? (
                       <User className="w-5 h-5 text-white" />
@@ -388,14 +388,14 @@ export default function ChatPage() {
 
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 shimmer flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-white animate-pulse" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div className="glass-card border border-white/10 p-4 rounded-2xl">
                   <div className="flex gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <div className="w-2 h-2 bg-purple-400 rounded-full" />
+                    <div className="w-2 h-2 bg-purple-400 rounded-full" />
+                    <div className="w-2 h-2 bg-purple-400 rounded-full" />
                   </div>
                 </div>
               </div>
@@ -417,7 +417,7 @@ export default function ChatPage() {
             <Button
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shimmer rounded-xl px-6 h-12"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl px-6 h-12"
             >
               <Send className="w-5 h-5" />
             </Button>

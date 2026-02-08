@@ -115,7 +115,7 @@ export default function DashboardLayout({
         {/* Footer */}
         <div className="pt-6 border-t border-white/10 space-y-2">
           <div className="flex items-center gap-3 px-3 py-2 rounded-2xl glass-card">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold shimmer">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold">
               {user?.full_name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">

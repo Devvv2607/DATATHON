@@ -1,14 +1,30 @@
+'use client';
+
 import Link from "next/link";
 import { TrendingUp, Brain, Zap, Target, ArrowRight, BarChart3, Sparkles } from "lucide-react";
+import Shuffle from "./dashboard/3dText";
+import DarkVeil from "@/components/DarkVeil";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-black relative">
-      {/* Animated background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-purple-600/20 rounded-full blur-[120px] animate-pulse" style={{animationDelay: '1s'}} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-indigo-600/10 rounded-full blur-[100px] float" />
+      {/* DarkVeil Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <DarkVeil
+          hueShift={0}
+          noiseIntensity={0.15}
+          scanlineIntensity={0.05}
+          speed={0.3}
+          scanlineFrequency={0.5}
+          warpAmount={0.2}
+        />
+      </div>
+
+      {/* Additional gradient overlays for depth */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-blue-600/20 rounded-full blur-[150px]" />
+        <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-cyan-600/20 rounded-full blur-[150px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-blue-700/15 rounded-full blur-[120px]" />
       </div>
 
       {/* Hero Section */}
@@ -46,11 +62,39 @@ export default function Home() {
               <span className="text-sm text-blue-300 font-medium">AI-Powered Trend Intelligence</span>
             </div>
             
+<Shuffle
+  text="Predict Trend Decline "
+  className="text-5xl sm:text-7xl font-bold normal-case "
+  shuffleDirection="right"
+  duration={0.40}
+  animationMode="evenodd"
+  shuffleTimes={1}
+  ease="power3.out"
+  stagger={0.03}
+  threshold={0.1}
+  triggerOnce={true}
+  triggerOnHover
+  respectReducedMotion={true}
+  loop={false}
+  loopDelay={0}
+/>
             <h1 className="text-5xl sm:text-7xl font-bold mb-6 leading-tight">
-              Predict Trend Decline
-              <br />
+              
               <span className="gradient-text">Before It Happens</span>
             </h1>
+
+            {/* Spline 3D Widget */}
+            <div className="w-full h-[500px] my-12 rounded-3xl overflow-hidden relative border border-slate-800/50 bg-transparent">
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none z-10" />
+              <iframe 
+                src="https://my.spline.design/widgetlytic-8MS7r1cHtOKxFl2NG9EH5xFR-5MO/"
+                frameBorder="0"
+                width="100%"
+                height="100%"
+                className="w-full h-full mix-blend-lighten opacity-90 pointer-events-none"
+                style={{ background: 'transparent' }}
+              />
+            </div>
             
             <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
               Leverage machine learning to identify dying trends, understand why they're fading, 
@@ -234,18 +278,19 @@ export default function Home() {
 
       {/* CTA Section */}
       <div className="max-w-4xl mx-auto px-6 py-24">
-        <div className="relative overflow-hidden rounded-[32px] p-12 text-center glass-strong shimmer">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10" />
+        <div className="relative overflow-hidden rounded-xl border border-[#374151] bg-[#151922] p-12 text-center">
+          {/* Subtle gradient overlay to match chart style */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#3B82F6]/5 via-transparent to-[#8B5CF6]/5 pointer-events-none" />
           
           <div className="relative z-10">
-            <BarChart3 className="w-16 h-16 mx-auto mb-6 text-blue-400 float" />
-            <h2 className="text-4xl font-bold mb-4">Ready to Stay Ahead?</h2>
-            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+            <BarChart3 className="w-16 h-16 mx-auto mb-6 text-[#3B82F6]" />
+            <h2 className="text-4xl font-bold mb-4 text-[#F9FAFB]">Ready to Stay Ahead?</h2>
+            <p className="text-xl text-[#D1D5DB] mb-8 max-w-2xl mx-auto">
               Join the brands that predict trend decline before their competitors even see it coming
             </p>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-[0_0_40px_rgba(96,165,250,0.5)] hover:scale-105 transition-all duration-300 text-lg font-semibold group"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] transition-colors text-lg font-semibold group text-white"
             >
               Start Analyzing Trends
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
